@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farmer Procurement Portal</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+}
+
+body{
+background:linear-gradient(135deg,#0f9b0f,#2e7d32);
+min-height:100vh;
+}
+
+header{
+background:white;
+padding:20px;
+text-align:center;
+box-shadow:0 2px 15px rgba(0,0,0,0.2);
+}
+
+header h1{
+color:#2e7d32;
+}
+
+.container{
+width:95%;
+max-width:1200px;
+margin:auto;
+padding:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:20px;
+box-shadow:0 5px 15px rgba(0,0,0,0.15);
+margin-bottom:20px;
+}
+
+input,textarea{
+width:100%;
+padding:12px;
+margin-top:8px;
+margin-bottom:15px;
+border:1px solid #ccc;
+border-radius:10px;
+}
+
+button{
+background:#2e7d32;
+color:white;
+border:none;
+padding:12px 20px;
+border-radius:10px;
+cursor:pointer;
+font-size:15px;
+}
+
+button:hover{
+background:#1b5e20;
+}
+
+.tabs{
+display:none;
+}
+
+.nav{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+margin-bottom:20px;
+}
+
+.nav button{
+flex:1;
+min-width:150px;
+}
+
+.tab-content{
+display:none;
+background:white;
+padding:20px;
+border-radius:15px;
+box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
+
+.active{
+display:block;
+}
+
+.success{
+background:#e8f5e9;
+padding:10px;
+border-radius:10px;
+margin-top:10px;
+}
+
+ul{
+list-style:none;
+}
+
+li{
+padding:10px;
+background:#f1f8e9;
+margin:8px 0;
+border-radius:8px;
+}
+
+.receipt{
+background:#f5f5f5;
+padding:15px;
+border-radius:10px;
+white-space:pre-wrap;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🌾 Farmer Procurement Portal 🚜</h1>
+<p>Smart Procurement Management System</p>
+</header>
+
+<div class="container">
+
+<div class="card" id="loginSection">
+
+<h2>🔐 Farmer Login</h2>
+
+<input type="text" id="name" placeholder="Farmer Name">
+
+<input type="tel" id="mobile" placeholder="Mobile Number">
+
+<button onclick="sendOTP()">Send OTP</button>
+
+<div id="otpArea" style="display:none">
+
+<input type="text" id="otp" placeholder="Enter OTP">
+
+<button onclick="verifyOTP()">Verify OTP</button>
+
+</div>
+
+<p id="loginMessage"></p>
+
+</div>
+
+<div class="tabs" id="portal">
+
+<div class="nav">
+
+<button onclick="showTab('slot')">📅 Slot Booking</button>
+
+<button onclick="showTab('truck')">🚚 Truck Booking</button>
+
+<button onclick="showTab('tractor')">🚜 Tractors</button>
+
+<button onclick="showTab('status')">📊 Status</button>
+
+<button onclick="showTab('issue')">📢 Issues</button>
+
+<button onclick="showTab('receipt')">🧾 Receipt</button>
+
+</div>
+
+<div id="slot" class="tab-content active">
+
+<h2>📅 Procurement Slot Booking</h2>
+
+<input type="text" id="crop" placeholder="Crop Name">
+
+<input type="number" id="qty" placeholder="Quantity">
+
+<input type="date" id="date">
+
+<button onclick="bookSlot()">Book Slot</button>
+
+<p id="slotResult"></p>
+
+</div>
+
+<div id="truck" class="tab-content">
+
+<h2>🚚 Book Truck</h2>
+
+<input type="text" id="pickup" placeholder="Pickup Village">
+
+<input type="text" id="destination" placeholder="Destination">
+
+<button onclick="bookTruck()">Book Truck</button>
+
+<p id="truckResult"></p>
+
+</div>
+
+<div id="tractor" class="tab-content">
+
+<h2>🚜 Nearby Tractors</h2>
+
+<button onclick="loadTractors()">Show Available Tractors</button>
+
+<ul id="tractorList"></ul>
+
+</div>
+
+<div id="status" class="tab-content">
+
+<h2>📊 Procurement Status</h2>
+
+<div class="success" id="statusBox">
+Waiting for booking...
+</div>
+
+</div>
+
+<div id="issue" class="tab-content">
+
+<h2>📢 Report Issue</h2>
+
+<textarea id="issueText" rows="5"
+placeholder="Describe your issue"></textarea>
+
+<button onclick="submitIssue()">Submit Issue</button>
+
+<p id="issueResult"></p>
+
+</div>
+
+<div id="receipt" class="tab-content">
+
+<h2>🧾 Digital Receipt</h2>
+
+<button onclick="generateReceipt()">Generate Receipt</button>
+
+<div class="receipt" id="receiptBox"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+let farmerName="";
+let farmerMobile="";
+let generatedOTP="";
+
+function sendOTP(){
+
+farmerName=document.getElementById("name").value;
+farmerMobile=document.getElementById("mobile").value;
+
+if(farmerName==="" || farmerMobile===""){
+alert("Enter Name and Mobile Number");
+return;
+}
+
+generatedOTP="1234";
+
+alert("Demo OTP: 1234");
+
+document.getElementById("otpArea").style.display="block";
+}
+
+function verifyOTP(){
+
+let otp=document.getElementById("otp").value;
+
+if(otp===generatedOTP){
+
+document.getElementById("loginMessage").innerHTML=
+"✅ Login Successful";
+
+document.getElementById("portal").style.display="block";
+
+document.getElementById("loginSection").style.display="none";
+
+}
+else{
+alert("Invalid OTP");
+}
+
+}
+
+function showTab(tab){
+
+let tabs=document.querySelectorAll(".tab-content");
+
+tabs.forEach(t=>t.style.display="none");
+
+document.getElementById(tab).style.display="block";
+
+}
+
+function bookSlot(){
+
+let crop=document.getElementById("crop").value;
+let qty=document.getElementById("qty").value;
+let date=document.getElementById("date").value;
+
+document.getElementById("slotResult").innerHTML=
+"✅ Slot Booked Successfully";
+
+document.getElementById("statusBox").innerHTML=
+"Crop: "+crop+"<br>Quantity: "+qty+
+"<br>Date: "+date+
+"<br>Status: Confirmed";
+
+}
+
+function bookTruck(){
+
+document.getElementById("truckResult").innerHTML=
+"🚚 Truck Assigned<br>Vehicle: TS09AB1234<br>Driver: Ramesh";
+
+}
+
+function loadTractors(){
+
+let tractors=[
+"Tractor 1 - 1.2 KM",
+"Tractor 2 - 2.5 KM",
+"Tractor 3 - 4.1 KM",
+"Tractor 4 - 5.3 KM"
+];
+
+let html="";
+
+tractors.forEach(function(t){
+html+="<li>"+t+"</li>";
+});
+
+document.getElementById("tractorList").innerHTML=html;
+
+}
+
+function submitIssue(){
+
+document.getElementById("issueResult").innerHTML=
+"✅ Issue Submitted Successfully";
+
+}
+
+function generateReceipt(){
+
+let crop=document.getElementById("crop").value;
+let qty=document.getElementById("qty").value;
+
+document.getElementById("receiptBox").innerHTML=
+
+"FARMER PROCUREMENT RECEIPT\n\n"+
+"Farmer: "+farmerName+"\n"+
+"Mobile: "+farmerMobile+"\n"+
+"Crop: "+crop+"\n"+
+"Quantity: "+qty+"\n"+
+"Status: Confirmed\n"+
+"Receipt ID: REC"+
+Math.floor(Math.random()*100000);
+
+}
+
+</script>
+
+</body>
+</html>
