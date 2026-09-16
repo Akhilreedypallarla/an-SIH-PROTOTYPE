@@ -1,376 +1,907 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="htmlRoot">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Farmer Procurement Portal</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KisanSetu — Smart Procurement &amp; Logistics Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Telugu:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Gurmukhi:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <style>
+  :root{
+    --forest:#14382B;
+    --forest-light:#1F5C42;
+    --forest-pale:#E7EFE8;
+    --wheat:#D9A441;
+    --wheat-light:#F1C36B;
+    --soil:#6B4423;
+    --bg:#F5F7F2;
+    --panel:#FFFFFF;
+    --ink:#16231B;
+    --ink-soft:#4B5A50;
+    --line:#DCE3DA;
+    --sky:#2C6E8F;
+    --sky-pale:#E7F0F4;
+    --alert:#B33A3A;
+    --alert-pale:#FBEAEA;
+    --success:#2F8F5B;
+    --radius-sm:6px;
+    --radius-md:10px;
+    --radius-lg:16px;
+    --font-ui:'Inter','Noto Sans Devanagari','Noto Sans Telugu','Noto Sans Tamil','Noto Sans Kannada','Noto Sans Bengali','Noto Sans Gurmukhi',sans-serif;
+    --font-head:'Poppins','Noto Sans Devanagari','Noto Sans Telugu','Noto Sans Tamil','Noto Sans Kannada','Noto Sans Bengali','Noto Sans Gurmukhi',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-ui);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.brand{font-family:var(--font-head);}
+  a{color:inherit;}
+  button{font-family:var(--font-ui);cursor:pointer;}
+  :focus-visible{outline:3px solid var(--sky);outline-offset:2px;}
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Segoe UI',sans-serif;
-}
+  /* ---------- Top bar ---------- */
+  .topbar{
+    background:var(--forest);
+    color:#fff;
+    padding:10px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    position:sticky;
+    top:0;
+    z-index:50;
+    border-bottom:3px solid var(--wheat);
+  }
+  .brand-row{display:flex;align-items:center;gap:10px;}
+  .brand-mark{
+    width:38px;height:38px;border-radius:9px;
+    background:var(--wheat);
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;flex-shrink:0;
+  }
+  .brand{font-size:19px;font-weight:700;letter-spacing:.2px;}
+  .brand small{display:block;font-family:var(--font-ui);font-weight:400;font-size:11px;color:#C9D8CE;letter-spacing:.3px;}
+  .top-actions{display:flex;align-items:center;gap:10px;}
+  select#langSelect{
+    background:var(--forest-light);
+    color:#fff;
+    border:1px solid rgba(255,255,255,.25);
+    border-radius:var(--radius-sm);
+    padding:7px 10px;
+    font-size:13px;
+  }
+  .login-pill{
+    background:var(--wheat);
+    color:var(--forest);
+    border:none;
+    border-radius:20px;
+    padding:8px 16px;
+    font-weight:600;
+    font-size:13px;
+  }
 
-body{
-background:linear-gradient(135deg,#0f9b0f,#2e7d32);
-min-height:100vh;
-}
+  /* ---------- Section nav ---------- */
+  .tabnav{
+    background:var(--panel);
+    border-bottom:1px solid var(--line);
+    position:sticky;
+    top:57px;
+    z-index:40;
+    overflow-x:auto;
+    white-space:nowrap;
+    -ms-overflow-style:none;
+    scrollbar-width:none;
+  }
+  .tabnav::-webkit-scrollbar{display:none;}
+  .tabnav-inner{display:flex;padding:0 12px;}
+  .tab-btn{
+    background:none;border:none;
+    padding:13px 14px;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    border-bottom:3px solid transparent;
+    display:flex;align-items:center;gap:6px;
+    flex-shrink:0;
+  }
+  .tab-btn.active{color:var(--forest);border-bottom-color:var(--wheat);}
 
-header{
-background:white;
-padding:20px;
-text-align:center;
-box-shadow:0 2px 15px rgba(0,0,0,0.2);
-}
+  /* ---------- Hero ---------- */
+  .hero{
+    padding:46px 20px 38px;
+    background:
+      radial-gradient(circle at 85% 0%, rgba(217,164,65,.18), transparent 55%),
+      linear-gradient(180deg,var(--forest-pale) 0%, var(--bg) 100%);
+    text-align:left;
+  }
+  .hero-inner{max-width:900px;margin:0 auto;}
+  .eyebrow-badge{
+    display:inline-flex;align-items:center;gap:7px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:6px 13px;
+    font-size:12px;
+    color:var(--forest);
+    font-weight:600;
+    margin-bottom:16px;
+  }
+  .eyebrow-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--success);animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+  .hero h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin:0 0 14px;color:var(--forest);max-width:16ch;}
+  .hero p{font-size:16px;color:var(--ink-soft);max-width:56ch;margin:0 0 22px;}
+  .hero-ctas{display:flex;gap:12px;flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--forest);color:#fff;border:none;
+    padding:13px 22px;border-radius:var(--radius-sm);
+    font-weight:600;font-size:14.5px;
+  }
+  .btn-secondary{
+    background:transparent;color:var(--forest);
+    border:1.5px solid var(--forest);
+    padding:12px 21px;border-radius:var(--radius-sm);
+    font-weight:600;font-size:14.5px;
+  }
+  .hero-stats{display:flex;gap:26px;margin-top:32px;flex-wrap:wrap;}
+  .hero-stat b{display:block;font-family:var(--font-head);font-size:24px;color:var(--forest);}
+  .hero-stat span{font-size:12.5px;color:var(--ink-soft);}
 
-header h1{
-color:#2e7d32;
-}
+  /* ---------- Panels / cards ---------- */
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px;}
+  section.panel{display:none;padding:36px 0 50px;}
+  section.panel.active{display:block;}
+  .panel-head{margin-bottom:22px;}
+  .panel-head h2{font-size:23px;color:var(--forest);margin:0 0 6px;}
+  .panel-head p{margin:0;color:var(--ink-soft);font-size:14.5px;max-width:65ch;}
 
-.container{
-width:95%;
-max-width:1200px;
-margin:auto;
-padding:20px;
-}
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    padding:24px;
+  }
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:640px){.grid-2{grid-template-columns:1fr;}}
 
-.card{
-background:white;
-padding:20px;
-border-radius:20px;
-box-shadow:0 5px 15px rgba(0,0,0,0.15);
-margin-bottom:20px;
-}
+  label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin:14px 0 6px;}
+  label:first-of-type{margin-top:0;}
+  input,select,textarea{
+    width:100%;
+    padding:11px 12px;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius-sm);
+    font-size:14.5px;
+    font-family:var(--font-ui);
+    color:var(--ink);
+    background:#fff;
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--forest-light);}
+  textarea{resize:vertical;min-height:90px;}
 
-input,textarea{
-width:100%;
-padding:12px;
-margin-top:8px;
-margin-bottom:15px;
-border:1px solid #ccc;
-border-radius:10px;
-}
+  .feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:8px;}
+  @media (max-width:760px){.feature-grid{grid-template-columns:1fr 1fr;}}
+  @media (max-width:480px){.feature-grid{grid-template-columns:1fr;}}
+  .feature-card{
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--radius-md);padding:18px;
+    display:flex;flex-direction:column;gap:8px;
+    text-align:left;
+  }
+  .feature-card .ic{font-size:24px;}
+  .feature-card h3{font-size:15px;margin:0;color:var(--forest);}
+  .feature-card p{font-size:13px;color:var(--ink-soft);margin:0;}
 
-button{
-background:#2e7d32;
-color:white;
-border:none;
-padding:12px 20px;
-border-radius:10px;
-cursor:pointer;
-font-size:15px;
-}
+  /* ---------- Buttons within panels ---------- */
+  .action-btn{
+    margin-top:18px;
+    background:var(--forest);
+    color:#fff;border:none;
+    padding:12px 20px;border-radius:var(--radius-sm);
+    font-weight:600;font-size:14px;
+  }
+  .action-btn:hover{background:var(--forest-light);}
+  .action-btn.gold{background:var(--wheat);color:var(--forest);}
+  .otp-row{display:flex;gap:10px;}
+  .otp-row input{flex:1;}
+  .otp-row button{white-space:nowrap;}
 
-button:hover{
-background:#1b5e20;
-}
+  .toast{
+    margin-top:16px;
+    padding:12px 14px;
+    border-radius:var(--radius-sm);
+    background:var(--forest-pale);
+    color:var(--forest-light);
+    font-size:13.5px;
+    font-weight:600;
+    display:none;
+    border:1px solid #C9DCC9;
+  }
+  .toast.show{display:block;}
 
-.tabs{
-display:none;
-}
+  /* ---------- Status timeline ---------- */
+  .timeline{list-style:none;margin:0;padding:0;}
+  .timeline li{
+    display:flex;gap:14px;padding:14px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .timeline li:last-child{border-bottom:none;}
+  .tl-dot{width:12px;height:12px;border-radius:50%;background:var(--line);margin-top:4px;flex-shrink:0;}
+  .tl-dot.done{background:var(--success);}
+  .tl-dot.current{background:var(--wheat);box-shadow:0 0 0 4px var(--wheat-light);}
+  .tl-body b{display:block;font-size:14px;}
+  .tl-body span{font-size:12.5px;color:var(--ink-soft);}
 
-.nav{
-display:flex;
-flex-wrap:wrap;
-gap:10px;
-margin-bottom:20px;
-}
+  /* ---------- Tractors ---------- */
+  .tractor-list{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px;}
+  @media (max-width:640px){.tractor-list{grid-template-columns:1fr;}}
+  .tractor-item{
+    border:1px solid var(--line);border-radius:var(--radius-md);
+    padding:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;
+  }
+  .tractor-item h4{margin:0 0 3px;font-size:14.5px;}
+  .tractor-item span{font-size:12.5px;color:var(--ink-soft);}
+  .chip{
+    font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:20px;
+    background:var(--forest-pale);color:var(--forest-light);white-space:nowrap;
+  }
 
-.nav button{
-flex:1;
-min-width:150px;
-}
+  /* ---------- Tracking ---------- */
+  .track-layout{display:grid;grid-template-columns:1.6fr 1fr;gap:18px;margin-top:18px;}
+  @media (max-width:800px){.track-layout{grid-template-columns:1fr;}}
+  #map{
+    height:420px;border-radius:var(--radius-lg);
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+  .truck-list{display:flex;flex-direction:column;gap:12px;max-height:420px;overflow-y:auto;}
+  .truck-card{
+    border:1px solid var(--line);border-radius:var(--radius-md);
+    padding:13px;background:var(--panel);cursor:pointer;
+    transition:border-color .15s;
+  }
+  .truck-card:hover,.truck-card.selected{border-color:var(--sky);}
+  .truck-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+  .truck-card-top b{font-size:14px;}
+  .status-tag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;}
+  .status-enroute{background:var(--sky-pale);color:var(--sky);}
+  .status-loading{background:#FDF2E0;color:var(--soil);}
+  .status-delivered{background:var(--forest-pale);color:var(--success);}
+  .truck-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);}
+  .truck-progress{height:5px;border-radius:5px;background:var(--line);margin-top:9px;overflow:hidden;}
+  .truck-progress i{display:block;height:100%;background:var(--sky);border-radius:5px;}
+  .leaflet-popup-content{font-family:var(--font-ui);font-size:13px;}
 
-.tab-content{
-display:none;
-background:white;
-padding:20px;
-border-radius:15px;
-box-shadow:0 4px 12px rgba(0,0,0,0.15);
-}
+  /* ---------- Receipt ---------- */
+  .receipt-box{
+    border:1.5px dashed var(--wheat);
+    border-radius:var(--radius-md);
+    padding:18px;margin-top:18px;
+    background:#FFFDF7;
+    font-size:13.5px;
+    display:none;
+  }
+  .receipt-box.show{display:block;}
+  .receipt-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);}
+  .receipt-row:last-child{border-bottom:none;font-weight:700;color:var(--forest);}
 
-.active{
-display:block;
-}
+  footer{
+    background:var(--forest);color:#C9D8CE;
+    padding:26px 20px;text-align:center;font-size:12.5px;
+  }
+  footer b{color:#fff;}
 
-.success{
-background:#e8f5e9;
-padding:10px;
-border-radius:10px;
-margin-top:10px;
-}
-
-ul{
-list-style:none;
-}
-
-li{
-padding:10px;
-background:#f1f8e9;
-margin:8px 0;
-border-radius:8px;
-}
-
-.receipt{
-background:#f5f5f5;
-padding:15px;
-border-radius:10px;
-white-space:pre-wrap;
-}
-
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important;}
+  }
 </style>
 </head>
-
 <body>
 
-<header>
-<h1>🌾 Farmer Procurement Portal 🚜</h1>
-<p>Smart Procurement Management System</p>
-</header>
-
-<div class="container">
-
-<div class="card" id="loginSection">
-
-<h2>🔐 Farmer Login</h2>
-
-<input type="text" id="name" placeholder="Farmer Name">
-
-<input type="tel" id="mobile" placeholder="Mobile Number">
-
-<button onclick="sendOTP()">Send OTP</button>
-
-<div id="otpArea" style="display:none">
-
-<input type="text" id="otp" placeholder="Enter OTP">
-
-<button onclick="verifyOTP()">Verify OTP</button>
-
+<div class="topbar">
+  <div class="brand-row">
+    <div class="brand-mark">🌾</div>
+    <div class="brand">KisanSetu<small data-i18n="tagline">Smart Procurement &amp; Logistics Platform</small></div>
+  </div>
+  <div class="top-actions">
+    <select id="langSelect" aria-label="Select language">
+      <option value="en">English</option>
+      <option value="hi">हिन्दी</option>
+      <option value="te">తెలుగు</option>
+      <option value="ta">தமிழ்</option>
+      <option value="kn">ಕನ್ನಡ</option>
+      <option value="mr">मराठी</option>
+      <option value="bn">বাংলা</option>
+      <option value="pa">ਪੰਜਾਬੀ</option>
+    </select>
+    <button class="login-pill" onclick="showPanel('login')" data-i18n="nav_login">Login</button>
+  </div>
 </div>
 
-<p id="loginMessage"></p>
+<nav class="tabnav">
+  <div class="tabnav-inner" id="tabnavInner">
+    <button class="tab-btn active" data-panel="home" onclick="showPanel('home')">🏠 <span data-i18n="nav_home">Home</span></button>
+    <button class="tab-btn" data-panel="slot" onclick="showPanel('slot')">📅 <span data-i18n="nav_slot">Slot Booking</span></button>
+    <button class="tab-btn" data-panel="truck" onclick="showPanel('truck')">🚚 <span data-i18n="nav_truck">Truck Booking</span></button>
+    <button class="tab-btn" data-panel="tracking" onclick="showPanel('tracking')">📍 <span data-i18n="nav_tracking">Live Tracking</span></button>
+    <button class="tab-btn" data-panel="tractor" onclick="showPanel('tractor')">🚜 <span data-i18n="nav_tractor">Tractors</span></button>
+    <button class="tab-btn" data-panel="status" onclick="showPanel('status')">📊 <span data-i18n="nav_status">Status</span></button>
+    <button class="tab-btn" data-panel="issues" onclick="showPanel('issues')">📢 <span data-i18n="nav_issues">Issues</span></button>
+    <button class="tab-btn" data-panel="receipt" onclick="showPanel('receipt')">🧾 <span data-i18n="nav_receipt">Receipt</span></button>
+  </div>
+</nav>
 
-</div>
+<!-- HOME -->
+<section class="panel active" id="panel-home">
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow-badge"><span class="dot"></span> <span data-i18n="live_badge">12 trucks live on the road right now</span></div>
+      <h1 data-i18n="hero_title">Every truckload, tracked from farm gate to mandi.</h1>
+      <p data-i18n="hero_sub">KisanSetu connects farmers, procurement centres and transport in one place — book a slot, book a truck, and watch it move on a live map, in your own language.</p>
+      <div class="hero-ctas">
+        <button class="btn-primary" onclick="showPanel('login')" data-i18n="hero_cta">Login as Farmer</button>
+        <button class="btn-secondary" onclick="showPanel('tracking')" data-i18n="hero_cta2">View Live Tracking</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><b>8</b><span data-i18n="stat_lang">Regional languages</span></div>
+        <div class="hero-stat"><b>24/7</b><span data-i18n="stat_track">Live truck tracking</span></div>
+        <div class="hero-stat"><b>1,400+</b><span data-i18n="stat_farmers">Farmers onboarded</span></div>
+      </div>
+    </div>
+  </div>
 
-<div class="tabs" id="portal">
+  <div class="wrap" style="padding:36px 0;">
+    <div class="panel-head">
+      <h2 data-i18n="features_title">What you can do here</h2>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card"><div class="ic">📅</div><h3 data-i18n="nav_slot">Slot Booking</h3><p data-i18n="feat_slot">Reserve a procurement slot at your nearest centre in seconds.</p></div>
+      <div class="feature-card"><div class="ic">🚚</div><h3 data-i18n="nav_truck">Truck Booking</h3><p data-i18n="feat_truck">Request a truck for pickup and get matched with a verified driver.</p></div>
+      <div class="feature-card"><div class="ic">📍</div><h3 data-i18n="nav_tracking">Live Tracking</h3><p data-i18n="feat_track">See exactly where your truck is on the map, updated in real time.</p></div>
+      <div class="feature-card"><div class="ic">🚜</div><h3 data-i18n="nav_tractor">Tractor Rental</h3><p data-i18n="feat_tractor">Find nearby tractors available for hire during harvest season.</p></div>
+      <div class="feature-card"><div class="ic">📢</div><h3 data-i18n="nav_issues">Report Issues</h3><p data-i18n="feat_issues">Flag a problem with a booking and reach support directly.</p></div>
+      <div class="feature-card"><div class="ic">🧾</div><h3 data-i18n="nav_receipt">Digital Receipt</h3><p data-i18n="feat_receipt">Generate a verified receipt for every completed procurement.</p></div>
+    </div>
+  </div>
+</section>
 
-<div class="nav">
+<!-- LOGIN -->
+<section class="panel" id="panel-login">
+  <div class="wrap" style="max-width:480px;">
+    <div class="panel-head">
+      <h2 data-i18n="login_title">Farmer Login</h2>
+      <p data-i18n="login_sub">Enter your registered mobile number to receive a one-time password.</p>
+    </div>
+    <div class="card">
+      <label data-i18n="login_phone_label">Mobile number</label>
+      <div class="otp-row">
+        <input type="tel" placeholder="+91 98765 43210" id="phoneInput" data-i18n-ph="login_phone_ph" />
+        <button class="action-btn" style="margin-top:0;" onclick="sendOtp()" data-i18n="login_send_otp">Send OTP</button>
+      </div>
+      <label data-i18n="login_otp_label">OTP</label>
+      <input type="text" maxlength="6" placeholder="••••••" id="otpInput" data-i18n-ph="login_otp_ph" />
+      <button class="action-btn gold" onclick="verifyOtp()" data-i18n="login_verify">Verify &amp; Continue</button>
+      <div class="toast" id="loginToast"></div>
+    </div>
+  </div>
+</section>
 
-<button onclick="showTab('slot')">📅 Slot Booking</button>
+<!-- SLOT BOOKING -->
+<section class="panel" id="panel-slot">
+  <div class="wrap">
+    <div class="panel-head">
+      <h2 data-i18n="slot_title">Procurement Slot Booking</h2>
+      <p data-i18n="slot_sub">Choose your crop, quantity and preferred date for delivery to the procurement centre.</p>
+    </div>
+    <div class="card">
+      <div class="grid-2">
+        <div>
+          <label data-i18n="slot_crop_label">Crop</label>
+          <select id="slotCrop">
+            <option data-i18n="crop_paddy">Paddy</option>
+            <option data-i18n="crop_wheat">Wheat</option>
+            <option data-i18n="crop_cotton">Cotton</option>
+            <option data-i18n="crop_maize">Maize</option>
+            <option data-i18n="crop_sugarcane">Sugarcane</option>
+          </select>
+        </div>
+        <div>
+          <label data-i18n="slot_qty_label">Quantity (quintals)</label>
+          <input type="number" placeholder="e.g. 25" id="slotQty" />
+        </div>
+        <div>
+          <label data-i18n="slot_centre_label">Procurement centre</label>
+          <select id="slotCentre">
+            <option data-i18n="centre_1">Mandal Agri Market Yard — Zone 1</option>
+            <option data-i18n="centre_2">Mandal Agri Market Yard — Zone 2</option>
+            <option data-i18n="centre_3">Village Collection Point</option>
+          </select>
+        </div>
+        <div>
+          <label data-i18n="slot_date_label">Preferred date</label>
+          <input type="date" id="slotDate" />
+        </div>
+      </div>
+      <button class="action-btn" onclick="bookSlot()" data-i18n="slot_book_btn">Book Slot</button>
+      <div class="toast" id="slotToast"></div>
+    </div>
+  </div>
+</section>
 
-<button onclick="showTab('truck')">🚚 Truck Booking</button>
+<!-- TRUCK BOOKING -->
+<section class="panel" id="panel-truck">
+  <div class="wrap">
+    <div class="panel-head">
+      <h2 data-i18n="truck_title">Book a Truck</h2>
+      <p data-i18n="truck_sub">Request pickup from your farm gate. You'll be able to track the assigned truck live once confirmed.</p>
+    </div>
+    <div class="card">
+      <div class="grid-2">
+        <div>
+          <label data-i18n="truck_pickup_label">Pickup location</label>
+          <input type="text" placeholder="Village / landmark" id="truckPickup" data-i18n-ph="truck_pickup_ph" />
+        </div>
+        <div>
+          <label data-i18n="truck_size_label">Truck size</label>
+          <select id="truckSize">
+            <option data-i18n="truck_small">Small (up to 3 tons)</option>
+            <option data-i18n="truck_medium">Medium (up to 7 tons)</option>
+            <option data-i18n="truck_large">Large (up to 12 tons)</option>
+          </select>
+        </div>
+        <div>
+          <label data-i18n="truck_time_label">Pickup time</label>
+          <input type="datetime-local" id="truckTime" />
+        </div>
+        <div>
+          <label data-i18n="truck_dest_label">Destination centre</label>
+          <select id="truckDest">
+            <option data-i18n="centre_1">Mandal Agri Market Yard — Zone 1</option>
+            <option data-i18n="centre_2">Mandal Agri Market Yard — Zone 2</option>
+          </select>
+        </div>
+      </div>
+      <button class="action-btn" onclick="bookTruck()" data-i18n="truck_book_btn">Book Truck</button>
+      <div class="toast" id="truckToast"></div>
+    </div>
+  </div>
+</section>
 
-<button onclick="showTab('tractor')">🚜 Tractors</button>
+<!-- LIVE TRACKING -->
+<section class="panel" id="panel-tracking">
+  <div class="wrap">
+    <div class="panel-head">
+      <h2 data-i18n="tracking_title">Live Truck Tracking</h2>
+      <p data-i18n="tracking_sub">Positions below are simulated for this prototype — in production each truck reports GPS location from an onboard IoT device every few seconds.</p>
+    </div>
+    <div class="track-layout">
+      <div id="map"></div>
+      <div class="truck-list" id="truckList"></div>
+    </div>
+  </div>
+</section>
 
-<button onclick="showTab('status')">📊 Status</button>
+<!-- TRACTORS -->
+<section class="panel" id="panel-tractor">
+  <div class="wrap">
+    <div class="panel-head">
+      <h2 data-i18n="tractor_title">Nearby Tractors</h2>
+      <p data-i18n="tractor_sub">Tractors currently available for hire near your registered village.</p>
+    </div>
+    <div class="card">
+      <button class="action-btn" style="margin-top:0;" onclick="showTractors()" data-i18n="tractor_show_btn">Show Available Tractors</button>
+      <div class="tractor-list" id="tractorList" style="display:none;"></div>
+    </div>
+  </div>
+</section>
 
-<button onclick="showTab('issue')">📢 Issues</button>
+<!-- STATUS -->
+<section class="panel" id="panel-status">
+  <div class="wrap" style="max-width:640px;">
+    <div class="panel-head">
+      <h2 data-i18n="status_title">Procurement Status</h2>
+      <p data-i18n="status_sub">Track the progress of your most recent booking end-to-end.</p>
+    </div>
+    <div class="card">
+      <ul class="timeline">
+        <li><span class="tl-dot done"></span><div class="tl-body"><b data-i18n="st_1_t">Slot booked</b><span data-i18n="st_1_s">Zone 1 · Today, 8:40 AM</span></div></li>
+        <li><span class="tl-dot done"></span><div class="tl-body"><b data-i18n="st_2_t">Truck assigned</b><span data-i18n="st_2_s">Driver: Ramesh K. · TN-09-AB-4521</span></div></li>
+        <li><span class="tl-dot current"></span><div class="tl-body"><b data-i18n="st_3_t">Truck en route to farm gate</b><span data-i18n="st_3_s" id="statusEta">ETA 12 minutes</span></div></li>
+        <li><span class="tl-dot"></span><div class="tl-body"><b data-i18n="st_4_t">Weighment &amp; quality check</b><span data-i18n="st_4_s">Pending arrival</span></div></li>
+        <li><span class="tl-dot"></span><div class="tl-body"><b data-i18n="st_5_t">Payment &amp; receipt</b><span data-i18n="st_5_s">Pending</span></div></li>
+      </ul>
+    </div>
+  </div>
+</section>
 
-<button onclick="showTab('receipt')">🧾 Receipt</button>
+<!-- ISSUES -->
+<section class="panel" id="panel-issues">
+  <div class="wrap" style="max-width:560px;">
+    <div class="panel-head">
+      <h2 data-i18n="issues_title">Report an Issue</h2>
+      <p data-i18n="issues_sub">Tell us what went wrong and our support team will follow up within 24 hours.</p>
+    </div>
+    <div class="card">
+      <label data-i18n="issues_type_label">Issue type</label>
+      <select id="issueType">
+        <option data-i18n="issue_1">Truck delayed</option>
+        <option data-i18n="issue_2">Wrong quantity recorded</option>
+        <option data-i18n="issue_3">Payment not received</option>
+        <option data-i18n="issue_4">Other</option>
+      </select>
+      <label data-i18n="issues_desc_label">Describe the issue</label>
+      <textarea id="issueDesc" data-i18n-ph="issues_ph" placeholder="Write details here..."></textarea>
+      <button class="action-btn" onclick="submitIssue()" data-i18n="issues_submit">Submit Issue</button>
+      <div class="toast" id="issueToast"></div>
+    </div>
+  </div>
+</section>
 
-</div>
+<!-- RECEIPT -->
+<section class="panel" id="panel-receipt">
+  <div class="wrap" style="max-width:560px;">
+    <div class="panel-head">
+      <h2 data-i18n="receipt_title">Digital Receipt</h2>
+      <p data-i18n="receipt_sub">Generate a verified digital receipt for a completed procurement.</p>
+    </div>
+    <div class="card">
+      <button class="action-btn" style="margin-top:0;" onclick="generateReceipt()" data-i18n="receipt_generate">Generate Receipt</button>
+      <div class="receipt-box" id="receiptBox">
+        <div class="receipt-row"><span data-i18n="r_farmer">Farmer</span><span>Suresh Naidu</span></div>
+        <div class="receipt-row"><span data-i18n="r_crop">Crop</span><span>Paddy · 25 quintals</span></div>
+        <div class="receipt-row"><span data-i18n="r_centre">Centre</span><span>Zone 1 Market Yard</span></div>
+        <div class="receipt-row"><span data-i18n="r_id">Receipt ID</span><span id="receiptId">KS-000000</span></div>
+        <div class="receipt-row"><span data-i18n="r_total">Total payable</span><span>₹ 48,750</span></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-<div id="slot" class="tab-content active">
+<footer>
+  <b>KisanSetu</b> · <span data-i18n="footer_text">Smart India Hackathon prototype — built for farmers, in every language they speak.</span>
+</footer>
 
-<h2>📅 Procurement Slot Booking</h2>
-
-<input type="text" id="crop" placeholder="Crop Name">
-
-<input type="number" id="qty" placeholder="Quantity">
-
-<input type="date" id="date">
-
-<button onclick="bookSlot()">Book Slot</button>
-
-<p id="slotResult"></p>
-
-</div>
-
-<div id="truck" class="tab-content">
-
-<h2>🚚 Book Truck</h2>
-
-<input type="text" id="pickup" placeholder="Pickup Village">
-
-<input type="text" id="destination" placeholder="Destination">
-
-<button onclick="bookTruck()">Book Truck</button>
-
-<p id="truckResult"></p>
-
-</div>
-
-<div id="tractor" class="tab-content">
-
-<h2>🚜 Nearby Tractors</h2>
-
-<button onclick="loadTractors()">Show Available Tractors</button>
-
-<ul id="tractorList"></ul>
-
-</div>
-
-<div id="status" class="tab-content">
-
-<h2>📊 Procurement Status</h2>
-
-<div class="success" id="statusBox">
-Waiting for booking...
-</div>
-
-</div>
-
-<div id="issue" class="tab-content">
-
-<h2>📢 Report Issue</h2>
-
-<textarea id="issueText" rows="5"
-placeholder="Describe your issue"></textarea>
-
-<button onclick="submitIssue()">Submit Issue</button>
-
-<p id="issueResult"></p>
-
-</div>
-
-<div id="receipt" class="tab-content">
-
-<h2>🧾 Digital Receipt</h2>
-
-<button onclick="generateReceipt()">Generate Receipt</button>
-
-<div class="receipt" id="receiptBox"></div>
-
-</div>
-
-</div>
-
-</div>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
+/* ---------------- i18n ---------------- */
+const I18N = {
+en:{tagline:"Smart Procurement & Logistics Platform",nav_login:"Login",nav_home:"Home",nav_slot:"Slot Booking",nav_truck:"Truck Booking",nav_tracking:"Live Tracking",nav_tractor:"Tractors",nav_status:"Status",nav_issues:"Issues",nav_receipt:"Receipt",
+live_badge:"12 trucks live on the road right now",hero_title:"Every truckload, tracked from farm gate to mandi.",hero_sub:"KisanSetu connects farmers, procurement centres and transport in one place — book a slot, book a truck, and watch it move on a live map, in your own language.",hero_cta:"Login as Farmer",hero_cta2:"View Live Tracking",
+stat_lang:"Regional languages",stat_track:"Live truck tracking",stat_farmers:"Farmers onboarded",
+features_title:"What you can do here",
+feat_slot:"Reserve a procurement slot at your nearest centre in seconds.",feat_truck:"Request a truck for pickup and get matched with a verified driver.",feat_track:"See exactly where your truck is on the map, updated in real time.",feat_tractor:"Find nearby tractors available for hire during harvest season.",feat_issues:"Flag a problem with a booking and reach support directly.",feat_receipt:"Generate a verified receipt for every completed procurement.",
+login_title:"Farmer Login",login_sub:"Enter your registered mobile number to receive a one-time password.",login_phone_label:"Mobile number",login_phone_ph:"+91 98765 43210",login_send_otp:"Send OTP",login_otp_label:"OTP",login_otp_ph:"••••••",login_verify:"Verify & Continue",
+slot_title:"Procurement Slot Booking",slot_sub:"Choose your crop, quantity and preferred date for delivery to the procurement centre.",slot_crop_label:"Crop",slot_qty_label:"Quantity (quintals)",slot_centre_label:"Procurement centre",slot_date_label:"Preferred date",slot_book_btn:"Book Slot",
+crop_paddy:"Paddy",crop_wheat:"Wheat",crop_cotton:"Cotton",crop_maize:"Maize",crop_sugarcane:"Sugarcane",
+centre_1:"Mandal Agri Market Yard — Zone 1",centre_2:"Mandal Agri Market Yard — Zone 2",centre_3:"Village Collection Point",
+truck_title:"Book a Truck",truck_sub:"Request pickup from your farm gate. You'll be able to track the assigned truck live once confirmed.",truck_pickup_label:"Pickup location",truck_pickup_ph:"Village / landmark",truck_size_label:"Truck size",truck_small:"Small (up to 3 tons)",truck_medium:"Medium (up to 7 tons)",truck_large:"Large (up to 12 tons)",truck_time_label:"Pickup time",truck_dest_label:"Destination centre",truck_book_btn:"Book Truck",
+tracking_title:"Live Truck Tracking",tracking_sub:"Positions below are simulated for this prototype — in production each truck reports GPS location from an onboard IoT device every few seconds.",
+tractor_title:"Nearby Tractors",tractor_sub:"Tractors currently available for hire near your registered village.",tractor_show_btn:"Show Available Tractors",
+status_title:"Procurement Status",status_sub:"Track the progress of your most recent booking end-to-end.",
+st_1_t:"Slot booked",st_1_s:"Zone 1 · Today, 8:40 AM",st_2_t:"Truck assigned",st_2_s:"Driver: Ramesh K. · TN-09-AB-4521",st_3_t:"Truck en route to farm gate",st_4_t:"Weighment & quality check",st_4_s:"Pending arrival",st_5_t:"Payment & receipt",st_5_s:"Pending",
+issues_title:"Report an Issue",issues_sub:"Tell us what went wrong and our support team will follow up within 24 hours.",issues_type_label:"Issue type",issue_1:"Truck delayed",issue_2:"Wrong quantity recorded",issue_3:"Payment not received",issue_4:"Other",issues_desc_label:"Describe the issue",issues_ph:"Write details here...",issues_submit:"Submit Issue",
+receipt_title:"Digital Receipt",receipt_sub:"Generate a verified digital receipt for a completed procurement.",receipt_generate:"Generate Receipt",r_farmer:"Farmer",r_crop:"Crop",r_centre:"Centre",r_id:"Receipt ID",r_total:"Total payable",
+footer_text:"Smart India Hackathon prototype — built for farmers, in every language they speak.",
+toast_otp_sent:"OTP sent to your mobile number.",toast_login_ok:"Login successful. Welcome back!",toast_slot_ok:"Slot booked successfully.",toast_truck_ok:"Truck booked — check Live Tracking for updates.",toast_issue_ok:"Issue submitted. Our team will contact you soon."},
 
-let farmerName="";
-let farmerMobile="";
-let generatedOTP="";
+hi:{tagline:"स्मार्ट खरीद एवं रसद प्रणाली",nav_login:"लॉगिन",nav_home:"होम",nav_slot:"स्लॉट बुकिंग",nav_truck:"ट्रक बुकिंग",nav_tracking:"लाइव ट्रैकिंग",nav_tractor:"ट्रैक्टर",nav_status:"स्थिति",nav_issues:"शिकायतें",nav_receipt:"रसीद",
+live_badge:"अभी 12 ट्रक सड़क पर लाइव हैं",hero_title:"हर ट्रक लोड, खेत से मंडी तक ट्रैक किया गया।",hero_sub:"KisanSetu किसानों, खरीद केंद्रों और परिवहन को एक जगह जोड़ता है — स्लॉट बुक करें, ट्रक बुक करें, और उसे लाइव मानचित्र पर, अपनी भाषा में देखें।",hero_cta:"किसान के रूप में लॉगिन करें",hero_cta2:"लाइव ट्रैकिंग देखें",
+stat_lang:"क्षेत्रीय भाषाएँ",stat_track:"लाइव ट्रक ट्रैकिंग",stat_farmers:"पंजीकृत किसान",
+features_title:"आप यहाँ क्या कर सकते हैं",
+feat_slot:"कुछ ही सेकंड में अपने नजदीकी केंद्र पर खरीद स्लॉट आरक्षित करें।",feat_truck:"पिकअप के लिए ट्रक का अनुरोध करें और सत्यापित चालक से मिलें।",feat_track:"मानचित्र पर वास्तविक समय में देखें कि आपका ट्रक कहाँ है।",feat_tractor:"फसल कटाई के मौसम में किराए के लिए उपलब्ध निकटवर्ती ट्रैक्टर खोजें।",feat_issues:"बुकिंग की समस्या दर्ज करें और सीधे सहायता तक पहुँचें।",feat_receipt:"हर पूर्ण खरीद के लिए सत्यापित रसीद बनाएं।",
+login_title:"किसान लॉगिन",login_sub:"वन-टाइम पासवर्ड प्राप्त करने के लिए अपना पंजीकृत मोबाइल नंबर दर्ज करें।",login_phone_label:"मोबाइल नंबर",login_phone_ph:"+91 98765 43210",login_send_otp:"OTP भेजें",login_otp_label:"OTP",login_otp_ph:"••••••",login_verify:"सत्यापित करें और जारी रखें",
+slot_title:"खरीद स्लॉट बुकिंग",slot_sub:"खरीद केंद्र में डिलीवरी के लिए अपनी फसल, मात्रा और पसंदीदा तिथि चुनें।",slot_crop_label:"फसल",slot_qty_label:"मात्रा (क्विंटल)",slot_centre_label:"खरीद केंद्र",slot_date_label:"पसंदीदा तिथि",slot_book_btn:"स्लॉट बुक करें",
+crop_paddy:"धान",crop_wheat:"गेहूं",crop_cotton:"कपास",crop_maize:"मक्का",crop_sugarcane:"गन्ना",
+centre_1:"मंडल कृषि बाजार यार्ड — ज़ोन 1",centre_2:"मंडल कृषि बाजार यार्ड — ज़ोन 2",centre_3:"ग्राम संग्रह केंद्र",
+truck_title:"ट्रक बुक करें",truck_sub:"अपने खेत से पिकअप का अनुरोध करें। पुष्टि होने के बाद आप ट्रक को लाइव ट्रैक कर सकेंगे।",truck_pickup_label:"पिकअप स्थान",truck_pickup_ph:"गाँव / लैंडमार्क",truck_size_label:"ट्रक का आकार",truck_small:"छोटा (3 टन तक)",truck_medium:"मध्यम (7 टन तक)",truck_large:"बड़ा (12 टन तक)",truck_time_label:"पिकअप समय",truck_dest_label:"गंतव्य केंद्र",truck_book_btn:"ट्रक बुक करें",
+tracking_title:"लाइव ट्रक ट्रैकिंग",tracking_sub:"नीचे दी गई स्थितियाँ इस प्रोटोटाइप के लिए अनुकरणित हैं — उत्पादन में हर ट्रक कुछ सेकंड में GPS स्थान भेजता है।",
+tractor_title:"निकटवर्ती ट्रैक्टर",tractor_sub:"आपके पंजीकृत गाँव के पास किराए के लिए उपलब्ध ट्रैक्टर।",tractor_show_btn:"उपलब्ध ट्रैक्टर दिखाएं",
+status_title:"खरीद स्थिति",status_sub:"अपनी हालिया बुकिंग की प्रगति को अंत तक ट्रैक करें।",
+st_1_t:"स्लॉट बुक हुआ",st_1_s:"ज़ोन 1 · आज, सुबह 8:40",st_2_t:"ट्रक आवंटित",st_2_s:"चालक: रमेश के. · TN-09-AB-4521",st_3_t:"ट्रक खेत की ओर आ रहा है",st_4_t:"तौल और गुणवत्ता जांच",st_4_s:"आगमन लंबित",st_5_t:"भुगतान और रसीद",st_5_s:"लंबित",
+issues_title:"शिकायत दर्ज करें",issues_sub:"हमें बताएं कि क्या गलत हुआ, हमारी टीम 24 घंटे में संपर्क करेगी।",issues_type_label:"समस्या प्रकार",issue_1:"ट्रक में देरी",issue_2:"गलत मात्रा दर्ज",issue_3:"भुगतान प्राप्त नहीं हुआ",issue_4:"अन्य",issues_desc_label:"समस्या का विवरण दें",issues_ph:"यहाँ विवरण लिखें...",issues_submit:"शिकायत भेजें",
+receipt_title:"डिजिटल रसीद",receipt_sub:"पूर्ण खरीद के लिए सत्यापित डिजिटल रसीद बनाएं।",receipt_generate:"रसीद बनाएं",r_farmer:"किसान",r_crop:"फसल",r_centre:"केंद्र",r_id:"रसीद संख्या",r_total:"कुल देय राशि",
+footer_text:"स्मार्ट इंडिया हैकाथॉन प्रोटोटाइप — किसानों के लिए, उनकी अपनी भाषा में बनाया गया।",
+toast_otp_sent:"आपके मोबाइल नंबर पर OTP भेजा गया।",toast_login_ok:"लॉगिन सफल रहा। वापसी पर स्वागत है!",toast_slot_ok:"स्लॉट सफलतापूर्वक बुक हुआ।",toast_truck_ok:"ट्रक बुक हो गया — अपडेट के लिए लाइव ट्रैकिंग देखें।",toast_issue_ok:"शिकायत भेज दी गई। हमारी टीम जल्द संपर्क करेगी।"},
 
-function sendOTP(){
+te:{tagline:"స్మార్ట్ సేకరణ & రవాణా వ్యవస్థ",nav_login:"లాగిన్",nav_home:"హోమ్",nav_slot:"స్లాట్ బుకింగ్",nav_truck:"ట్రక్ బుకింగ్",nav_tracking:"లైవ్ ట్రాకింగ్",nav_tractor:"ట్రాక్టర్లు",nav_status:"స్థితి",nav_issues:"సమస్యలు",nav_receipt:"రసీదు",
+live_badge:"ఇప్పుడు 12 ట్రక్కులు రోడ్డుపై లైవ్‌లో ఉన్నాయి",hero_title:"ప్రతి ట్రక్ లోడ్, పొలం నుండి మార్కెట్ వరకు ట్రాక్ చేయబడుతుంది.",hero_sub:"KisanSetu రైతులు, సేకరణ కేంద్రాలు మరియు రవాణాను ఒకే చోట కలుపుతుంది — స్లాట్ బుక్ చేయండి, ట్రక్ బుక్ చేయండి, మీ భాషలో లైవ్ మ్యాప్‌లో చూడండి.",hero_cta:"రైతుగా లాగిన్ అవ్వండి",hero_cta2:"లైవ్ ట్రాకింగ్ చూడండి",
+stat_lang:"ప్రాంతీయ భాషలు",stat_track:"లైవ్ ట్రక్ ట్రాకింగ్",stat_farmers:"నమోదైన రైతులు",
+features_title:"మీరు ఇక్కడ ఏమి చేయవచ్చు",
+feat_slot:"సెకన్లలో మీ సమీప కేంద్రంలో సేకరణ స్లాట్‌ను రిజర్వ్ చేయండి.",feat_truck:"పికప్ కోసం ట్రక్ అభ్యర్థించి ధృవీకరించబడిన డ్రైవర్‌తో సరిపోలండి.",feat_track:"మీ ట్రక్ ఎక్కడ ఉందో మ్యాప్‌లో నిజ సమయంలో చూడండి.",feat_tractor:"పంట కోత సమయంలో అద్దెకు దొరికే సమీప ట్రాక్టర్లను కనుగొనండి.",feat_issues:"బుకింగ్ సమస్యను నివేదించి నేరుగా మద్దతును సంప్రదించండి.",feat_receipt:"ప్రతి పూర్తయిన సేకరణకు ధృవీకరించబడిన రసీదును రూపొందించండి.",
+login_title:"రైతు లాగిన్",login_sub:"వన్-టైమ్ పాస్‌వర్డ్ పొందడానికి మీ నమోదిత మొబైల్ నంబర్‌ను నమోదు చేయండి.",login_phone_label:"మొబైల్ నంబర్",login_phone_ph:"+91 98765 43210",login_send_otp:"OTP పంపండి",login_otp_label:"OTP",login_otp_ph:"••••••",login_verify:"ధృవీకరించి కొనసాగించండి",
+slot_title:"సేకరణ స్లాట్ బుకింగ్",slot_sub:"సేకరణ కేంద్రానికి డెలివరీ కోసం మీ పంట, పరిమాణం మరియు తేదీని ఎంచుకోండి.",slot_crop_label:"పంట",slot_qty_label:"పరిమాణం (క్వింటాళ్లు)",slot_centre_label:"సేకరణ కేంద్రం",slot_date_label:"ఇష్టమైన తేదీ",slot_book_btn:"స్లాట్ బుక్ చేయండి",
+crop_paddy:"వరి",crop_wheat:"గోధుమ",crop_cotton:"పత్తి",crop_maize:"మొక్కజొన్న",crop_sugarcane:"చెరకు",
+centre_1:"మండల వ్యవసాయ మార్కెట్ యార్డ్ — జోన్ 1",centre_2:"మండల వ్యవసాయ మార్కెట్ యార్డ్ — జోన్ 2",centre_3:"గ్రామ సేకరణ కేంద్రం",
+truck_title:"ట్రక్ బుక్ చేయండి",truck_sub:"మీ పొలం నుండి పికప్ కోసం అభ్యర్థించండి. నిర్ధారించిన తర్వాత ట్రక్‌ను లైవ్‌గా ట్రాక్ చేయవచ్చు.",truck_pickup_label:"పికప్ ప్రదేశం",truck_pickup_ph:"గ్రామం / గుర్తు",truck_size_label:"ట్రక్ పరిమాణం",truck_small:"చిన్నది (3 టన్నుల వరకు)",truck_medium:"మధ్యస్థం (7 టన్నుల వరకు)",truck_large:"పెద్దది (12 టన్నుల వరకు)",truck_time_label:"పికప్ సమయం",truck_dest_label:"గమ్య కేంద్రం",truck_book_btn:"ట్రక్ బుక్ చేయండి",
+tracking_title:"లైవ్ ట్రక్ ట్రాకింగ్",tracking_sub:"ఈ ప్రోటోటైప్ కోసం క్రింది స్థానాలు అనుకరించబడ్డాయి — ఉత్పత్తిలో ప్రతి ట్రక్ కొన్ని సెకన్లకు ఒకసారి GPS స్థానాన్ని పంపుతుంది.",
+tractor_title:"సమీప ట్రాక్టర్లు",tractor_sub:"మీ నమోదిత గ్రామానికి సమీపంలో అద్దెకు అందుబాటులో ఉన్న ట్రాక్టర్లు.",tractor_show_btn:"అందుబాటులో ఉన్న ట్రాక్టర్లు చూపించు",
+status_title:"సేకరణ స్థితి",status_sub:"మీ ఇటీవలి బుకింగ్ పురోగతిని అంతం వరకు ట్రాక్ చేయండి.",
+st_1_t:"స్లాట్ బుక్ అయ్యింది",st_1_s:"జోన్ 1 · ఈరోజు, ఉదయం 8:40",st_2_t:"ట్రక్ కేటాయించబడింది",st_2_s:"డ్రైవర్: రమేష్ కె. · TN-09-AB-4521",st_3_t:"ట్రక్ పొలం వైపు వస్తోంది",st_4_t:"తూకం & నాణ్యత తనిఖీ",st_4_s:"రాక పెండింగ్‌లో ఉంది",st_5_t:"చెల్లింపు & రసీదు",st_5_s:"పెండింగ్‌లో ఉంది",
+issues_title:"సమస్యను నివేదించండి",issues_sub:"ఏమి తప్పు జరిగిందో మాకు తెలియజేయండి, మా బృందం 24 గంటల్లో సంప్రదిస్తుంది.",issues_type_label:"సమస్య రకం",issue_1:"ట్రక్ ఆలస్యం",issue_2:"తప్పు పరిమాణం నమోదైంది",issue_3:"చెల్లింపు అందలేదు",issue_4:"ఇతరం",issues_desc_label:"సమస్యను వివరించండి",issues_ph:"వివరాలు ఇక్కడ రాయండి...",issues_submit:"సమస్యను సమర్పించండి",
+receipt_title:"డిజిటల్ రసీదు",receipt_sub:"పూర్తయిన సేకరణకు ధృవీకరించబడిన డిజిటల్ రసీదును రూపొందించండి.",receipt_generate:"రసీదు రూపొందించండి",r_farmer:"రైతు",r_crop:"పంట",r_centre:"కేంద్రం",r_id:"రసీదు ఐడి",r_total:"మొత్తం చెల్లించవలసినది",
+footer_text:"స్మార్ట్ ఇండియా హ్యాకథాన్ ప్రోటోటైప్ — రైతుల కోసం, వారి సొంత భాషలో నిర్మించబడింది.",
+toast_otp_sent:"మీ మొబైల్ నంబర్‌కు OTP పంపబడింది.",toast_login_ok:"లాగిన్ విజయవంతమైంది. తిరిగి స్వాగతం!",toast_slot_ok:"స్లాట్ విజయవంతంగా బుక్ అయ్యింది.",toast_truck_ok:"ట్రక్ బుక్ అయ్యింది — అప్‌డేట్ల కోసం లైవ్ ట్రాకింగ్ చూడండి.",toast_issue_ok:"సమస్య సమర్పించబడింది. మా బృందం త్వరలో సంప్రదిస్తుంది."},
 
-farmerName=document.getElementById("name").value;
-farmerMobile=document.getElementById("mobile").value;
+ta:{tagline:"ஸ்மார்ட் கொள்முதல் & லாஜிஸ்டிக்ஸ் தளம்",nav_login:"உள்நுழைய",nav_home:"முகப்பு",nav_slot:"ஸ்லாட் முன்பதிவு",nav_truck:"லாரி முன்பதிவு",nav_tracking:"நேரலை கண்காணிப்பு",nav_tractor:"டிராக்டர்கள்",nav_status:"நிலை",nav_issues:"புகார்கள்",nav_receipt:"ரசீது",
+live_badge:"இப்போது 12 லாரிகள் சாலையில் நேரலையில் உள்ளன",hero_title:"ஒவ்வொரு லாரி சுமையும், வயலில் இருந்து சந்தை வரை கண்காணிக்கப்படுகிறது.",hero_sub:"KisanSetu விவசாயிகள், கொள்முதல் மையங்கள் மற்றும் போக்குவரத்தை ஒரே இடத்தில் இணைக்கிறது — ஸ்லாட் பதிவு செய்யுங்கள், லாரி பதிவு செய்யுங்கள், உங்கள் மொழியில் நேரலை வரைபடத்தில் பாருங்கள்.",hero_cta:"விவசாயியாக உள்நுழையவும்",hero_cta2:"நேரலை கண்காணிப்பைப் பார்க்க",
+stat_lang:"பிராந்திய மொழிகள்",stat_track:"நேரலை லாரி கண்காணிப்பு",stat_farmers:"பதிவு செய்த விவசாயிகள்",
+features_title:"இங்கு நீங்கள் என்ன செய்யலாம்",
+feat_slot:"சில வினாடிகளில் உங்கள் அருகிலுள்ள மையத்தில் கொள்முதல் ஸ்லாட்டை பதிவு செய்யுங்கள்.",feat_truck:"பிக்அப்பிற்கு லாரி கோரி சரிபார்க்கப்பட்ட ஓட்டுநருடன் இணைக்கப்படுங்கள்.",feat_track:"உங்கள் லாரி எங்கே உள்ளது என்பதை வரைபடத்தில் நிகழ்நேரத்தில் பாருங்கள்.",feat_tractor:"அறுவடை காலத்தில் வாடகைக்கு கிடைக்கும் அருகிலுள்ள டிராக்டர்களைக் கண்டறியவும்.",feat_issues:"முன்பதிவு சிக்கலைப் புகாரளித்து நேரடியாக ஆதரவை அணுகவும்.",feat_receipt:"முடிந்த ஒவ்வொரு கொள்முதலுக்கும் சரிபார்க்கப்பட்ட ரசீதை உருவாக்குங்கள்.",
+login_title:"விவசாயி உள்நுழைவு",login_sub:"ஒரு முறை கடவுச்சொல் பெற உங்கள் பதிவு செய்யப்பட்ட மொபைல் எண்ணை உள்ளிடவும்.",login_phone_label:"மொபைல் எண்",login_phone_ph:"+91 98765 43210",login_send_otp:"OTP அனுப்பு",login_otp_label:"OTP",login_otp_ph:"••••••",login_verify:"சரிபார்த்து தொடரவும்",
+slot_title:"கொள்முதல் ஸ்லாட் முன்பதிவு",slot_sub:"கொள்முதல் மையத்திற்கு டெலிவரிக்கு உங்கள் பயிர், அளவு மற்றும் தேதியைத் தேர்ந்தெடுக்கவும்.",slot_crop_label:"பயிர்",slot_qty_label:"அளவு (குவிண்டால்)",slot_centre_label:"கொள்முதல் மையம்",slot_date_label:"விருப்பமான தேதி",slot_book_btn:"ஸ்லாட் பதிவு செய்யவும்",
+crop_paddy:"நெல்",crop_wheat:"கோதுமை",crop_cotton:"பருத்தி",crop_maize:"சோளம்",crop_sugarcane:"கரும்பு",
+centre_1:"மண்டல வேளாண் சந்தை முற்றம் — மண்டலம் 1",centre_2:"மண்டல வேளாண் சந்தை முற்றம் — மண்டலம் 2",centre_3:"கிராம சேகரிப்பு மையம்",
+truck_title:"லாரி பதிவு செய்யவும்",truck_sub:"உங்கள் வயலில் இருந்து பிக்அப்பை கோரவும். உறுதி செய்யப்பட்டதும் லாரியை நேரலையில் கண்காணிக்கலாம்.",truck_pickup_label:"பிக்அப் இடம்",truck_pickup_ph:"கிராமம் / அடையாளம்",truck_size_label:"லாரி அளவு",truck_small:"சிறியது (3 டன் வரை)",truck_medium:"நடுத்தரம் (7 டன் வரை)",truck_large:"பெரியது (12 டன் வரை)",truck_time_label:"பிக்அப் நேரம்",truck_dest_label:"சேருமிட மையம்",truck_book_btn:"லாரி பதிவு செய்யவும்",
+tracking_title:"நேரலை லாரி கண்காணிப்பு",tracking_sub:"கீழே உள்ள இடங்கள் இந்த முன்மாதிரிக்காக உருவகப்படுத்தப்பட்டவை — நிஜ செயலில் ஒவ்வொரு லாரியும் சில வினாடிகளுக்கு ஒருமுறை GPS இடத்தை அனுப்பும்.",
+tractor_title:"அருகிலுள்ள டிராக்டர்கள்",tractor_sub:"உங்கள் பதிவு செய்யப்பட்ட கிராமத்திற்கு அருகில் வாடகைக்கு கிடைக்கும் டிராக்டர்கள்.",tractor_show_btn:"கிடைக்கும் டிராக்டர்களைக் காட்டு",
+status_title:"கொள்முதல் நிலை",status_sub:"உங்கள் சமீபத்திய முன்பதிவின் முன்னேற்றத்தை முழுவதுமாக கண்காணிக்கவும்.",
+st_1_t:"ஸ்லாட் பதிவு செய்யப்பட்டது",st_1_s:"மண்டலம் 1 · இன்று, காலை 8:40",st_2_t:"லாரி ஒதுக்கப்பட்டது",st_2_s:"ஓட்டுநர்: ரமேஷ் கே. · TN-09-AB-4521",st_3_t:"லாரி வயலை நோக்கி வருகிறது",st_4_t:"நிறுவை & தர சோதனை",st_4_s:"வருகை நிலுவையில்",st_5_t:"கட்டணம் & ரசீது",st_5_s:"நிலுவையில்",
+issues_title:"சிக்கலைப் புகாரளிக்கவும்",issues_sub:"என்ன தவறு நடந்தது என்று எங்களிடம் கூறுங்கள், எங்கள் குழு 24 மணி நேரத்திற்குள் தொடர்பு கொள்ளும்.",issues_type_label:"சிக்கல் வகை",issue_1:"லாரி தாமதம்",issue_2:"தவறான அளவு பதிவு",issue_3:"கட்டணம் பெறப்படவில்லை",issue_4:"மற்றவை",issues_desc_label:"சிக்கலை விவரிக்கவும்",issues_ph:"விவரங்களை இங்கே எழுதுங்கள்...",issues_submit:"புகாரைச் சமர்ப்பிக்கவும்",
+receipt_title:"டிஜிட்டல் ரசீது",receipt_sub:"முடிந்த கொள்முதலுக்கு சரிபார்க்கப்பட்ட டிஜிட்டல் ரசீதை உருவாக்குங்கள்.",receipt_generate:"ரசீது உருவாக்கவும்",r_farmer:"விவசாயி",r_crop:"பயிர்",r_centre:"மையம்",r_id:"ரசீது ஐடி",r_total:"மொத்தம் செலுத்த வேண்டியது",
+footer_text:"ஸ்மார்ட் இந்தியா ஹேக்கத்தான் முன்மாதிரி — விவசாயிகளுக்காக, அவர்களின் சொந்த மொழியில் உருவாக்கப்பட்டது.",
+toast_otp_sent:"உங்கள் மொபைல் எண்ணிற்கு OTP அனுப்பப்பட்டது.",toast_login_ok:"உள்நுழைவு வெற்றி. மீண்டும் வரவேற்கிறோம்!",toast_slot_ok:"ஸ்லாட் வெற்றிகரமாக பதிவு செய்யப்பட்டது.",toast_truck_ok:"லாரி பதிவு செய்யப்பட்டது — புதுப்பிப்புகளுக்கு நேரலை கண்காணிப்பைப் பார்க்கவும்.",toast_issue_ok:"புகார் சமர்ப்பிக்கப்பட்டது. எங்கள் குழு விரைவில் தொடர்பு கொள்ளும்."},
 
-if(farmerName==="" || farmerMobile===""){
-alert("Enter Name and Mobile Number");
-return;
+kn:{tagline:"ಸ್ಮಾರ್ಟ್ ಸಂಗ್ರಹಣೆ & ಸಾರಿಗೆ ವೇದಿಕೆ",nav_login:"ಲಾಗಿನ್",nav_home:"ಮುಖಪುಟ",nav_slot:"ಸ್ಲಾಟ್ ಬುಕಿಂಗ್",nav_truck:"ಟ್ರಕ್ ಬುಕಿಂಗ್",nav_tracking:"ಲೈವ್ ಟ್ರ್ಯಾಕಿಂಗ್",nav_tractor:"ಟ್ರ್ಯಾಕ್ಟರ್‌ಗಳು",nav_status:"ಸ್ಥಿತಿ",nav_issues:"ಸಮಸ್ಯೆಗಳು",nav_receipt:"ರಸೀದಿ",
+live_badge:"ಈಗ 12 ಟ್ರಕ್‌ಗಳು ರಸ್ತೆಯಲ್ಲಿ ಲೈವ್‌ನಲ್ಲಿವೆ",hero_title:"ಪ್ರತಿ ಟ್ರಕ್ ಲೋಡ್, ಹೊಲದಿಂದ ಮಾರುಕಟ್ಟೆಯವರೆಗೆ ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗಿದೆ.",hero_sub:"KisanSetu ರೈತರು, ಸಂಗ್ರಹಣಾ ಕೇಂದ್ರಗಳು ಮತ್ತು ಸಾರಿಗೆಯನ್ನು ಒಂದೇ ಸ್ಥಳದಲ್ಲಿ ಸಂಪರ್ಕಿಸುತ್ತದೆ — ಸ್ಲಾಟ್ ಬುಕ್ ಮಾಡಿ, ಟ್ರಕ್ ಬುಕ್ ಮಾಡಿ, ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲಿ ಲೈವ್ ನಕ್ಷೆಯಲ್ಲಿ ನೋಡಿ.",hero_cta:"ರೈತರಾಗಿ ಲಾಗಿನ್ ಮಾಡಿ",hero_cta2:"ಲೈವ್ ಟ್ರ್ಯಾಕಿಂಗ್ ನೋಡಿ",
+stat_lang:"ಪ್ರಾದೇಶಿಕ ಭಾಷೆಗಳು",stat_track:"ಲೈವ್ ಟ್ರಕ್ ಟ್ರ್ಯಾಕಿಂಗ್",stat_farmers:"ನೋಂದಾಯಿತ ರೈತರು",
+features_title:"ನೀವು ಇಲ್ಲಿ ಏನು ಮಾಡಬಹುದು",
+feat_slot:"ಸೆಕೆಂಡುಗಳಲ್ಲಿ ನಿಮ್ಮ ಹತ್ತಿರದ ಕೇಂದ್ರದಲ್ಲಿ ಸಂಗ್ರಹಣಾ ಸ್ಲಾಟ್ ಕಾಯ್ದಿರಿಸಿ.",feat_truck:"ಪಿಕಪ್‌ಗಾಗಿ ಟ್ರಕ್ ವಿನಂತಿಸಿ ಮತ್ತು ಪರಿಶೀಲಿಸಿದ ಚಾಲಕರೊಂದಿಗೆ ಹೊಂದಿಸಿ.",feat_track:"ನಿಮ್ಮ ಟ್ರಕ್ ಎಲ್ಲಿದೆ ಎಂದು ನಕ್ಷೆಯಲ್ಲಿ ನೈಜ ಸಮಯದಲ್ಲಿ ನೋಡಿ.",feat_tractor:"ಕೊಯ್ಲು ಋತುವಿನಲ್ಲಿ ಬಾಡಿಗೆಗೆ ಲಭ್ಯವಿರುವ ಹತ್ತಿರದ ಟ್ರ್ಯಾಕ್ಟರ್‌ಗಳನ್ನು ಹುಡುಕಿ.",feat_issues:"ಬುಕಿಂಗ್ ಸಮಸ್ಯೆಯನ್ನು ವರದಿ ಮಾಡಿ ಮತ್ತು ನೇರವಾಗಿ ಬೆಂಬಲವನ್ನು ಸಂಪರ್ಕಿಸಿ.",feat_receipt:"ಪ್ರತಿ ಪೂರ್ಣಗೊಂಡ ಸಂಗ್ರಹಣೆಗೆ ಪರಿಶೀಲಿಸಿದ ರಸೀದಿ ರಚಿಸಿ.",
+login_title:"ರೈತ ಲಾಗಿನ್",login_sub:"ಒಂದು ಬಾರಿಯ ಪಾಸ್‌ವರ್ಡ್ ಪಡೆಯಲು ನಿಮ್ಮ ನೋಂದಾಯಿತ ಮೊಬೈಲ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ.",login_phone_label:"ಮೊಬೈಲ್ ಸಂಖ್ಯೆ",login_phone_ph:"+91 98765 43210",login_send_otp:"OTP ಕಳುಹಿಸಿ",login_otp_label:"OTP",login_otp_ph:"••••••",login_verify:"ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಮುಂದುವರಿಸಿ",
+slot_title:"ಸಂಗ್ರಹಣಾ ಸ್ಲಾಟ್ ಬುಕಿಂಗ್",slot_sub:"ಸಂಗ್ರಹಣಾ ಕೇಂದ್ರಕ್ಕೆ ವಿತರಣೆಗಾಗಿ ನಿಮ್ಮ ಬೆಳೆ, ಪ್ರಮಾಣ ಮತ್ತು ದಿನಾಂಕವನ್ನು ಆಯ್ಕೆಮಾಡಿ.",slot_crop_label:"ಬೆಳೆ",slot_qty_label:"ಪ್ರಮಾಣ (ಕ್ವಿಂಟಲ್)",slot_centre_label:"ಸಂಗ್ರಹಣಾ ಕೇಂದ್ರ",slot_date_label:"ಇಚ್ಛಿತ ದಿನಾಂಕ",slot_book_btn:"ಸ್ಲಾಟ್ ಬುಕ್ ಮಾಡಿ",
+crop_paddy:"ಭತ್ತ",crop_wheat:"ಗೋಧಿ",crop_cotton:"ಹತ್ತಿ",crop_maize:"ಜೋಳ",crop_sugarcane:"ಕಬ್ಬು",
+centre_1:"ಮಂಡಲ ಕೃಷಿ ಮಾರುಕಟ್ಟೆ ಪ್ರಾಂಗಣ — ವಲಯ 1",centre_2:"ಮಂಡಲ ಕೃಷಿ ಮಾರುಕಟ್ಟೆ ಪ್ರಾಂಗಣ — ವಲಯ 2",centre_3:"ಗ್ರಾಮ ಸಂಗ್ರಹ ಕೇಂದ್ರ",
+truck_title:"ಟ್ರಕ್ ಬುಕ್ ಮಾಡಿ",truck_sub:"ನಿಮ್ಮ ಹೊಲದಿಂದ ಪಿಕಪ್ ವಿನಂತಿಸಿ. ದೃಢೀಕರಿಸಿದ ನಂತರ ಟ್ರಕ್ ಅನ್ನು ಲೈವ್ ಆಗಿ ಟ್ರ್ಯಾಕ್ ಮಾಡಬಹುದು.",truck_pickup_label:"ಪಿಕಪ್ ಸ್ಥಳ",truck_pickup_ph:"ಗ್ರಾಮ / ಗುರುತು",truck_size_label:"ಟ್ರಕ್ ಗಾತ್ರ",truck_small:"ಚಿಕ್ಕದು (3 ಟನ್‌ವರೆಗೆ)",truck_medium:"ಮಧ್ಯಮ (7 ಟನ್‌ವರೆಗೆ)",truck_large:"ದೊಡ್ಡದು (12 ಟನ್‌ವರೆಗೆ)",truck_time_label:"ಪಿಕಪ್ ಸಮಯ",truck_dest_label:"ಗಮ್ಯ ಕೇಂದ್ರ",truck_book_btn:"ಟ್ರಕ್ ಬುಕ್ ಮಾಡಿ",
+tracking_title:"ಲೈವ್ ಟ್ರಕ್ ಟ್ರ್ಯಾಕಿಂಗ್",tracking_sub:"ಕೆಳಗಿನ ಸ್ಥಾನಗಳು ಈ ಪ್ರೋಟೋಟೈಪ್‌ಗಾಗಿ ಅನುಕರಿಸಲ್ಪಟ್ಟಿವೆ — ಉತ್ಪಾದನೆಯಲ್ಲಿ ಪ್ರತಿ ಟ್ರಕ್ ಕೆಲವು ಸೆಕೆಂಡುಗಳಿಗೊಮ್ಮೆ GPS ಸ್ಥಳವನ್ನು ಕಳುಹಿಸುತ್ತದೆ.",
+tractor_title:"ಹತ್ತಿರದ ಟ್ರ್ಯಾಕ್ಟರ್‌ಗಳು",tractor_sub:"ನಿಮ್ಮ ನೋಂದಾಯಿತ ಗ್ರಾಮದ ಬಳಿ ಬಾಡಿಗೆಗೆ ಲಭ್ಯವಿರುವ ಟ್ರ್ಯಾಕ್ಟರ್‌ಗಳು.",tractor_show_btn:"ಲಭ್ಯವಿರುವ ಟ್ರ್ಯಾಕ್ಟರ್‌ಗಳನ್ನು ತೋರಿಸಿ",
+status_title:"ಸಂಗ್ರಹಣಾ ಸ್ಥಿತಿ",status_sub:"ನಿಮ್ಮ ಇತ್ತೀಚಿನ ಬುಕಿಂಗ್‌ನ ಪ್ರಗತಿಯನ್ನು ಕೊನೆಯವರೆಗೆ ಟ್ರ್ಯಾಕ್ ಮಾಡಿ.",
+st_1_t:"ಸ್ಲಾಟ್ ಬುಕ್ ಆಗಿದೆ",st_1_s:"ವಲಯ 1 · ಇಂದು, ಬೆಳಿಗ್ಗೆ 8:40",st_2_t:"ಟ್ರಕ್ ನಿಯೋಜಿಸಲಾಗಿದೆ",st_2_s:"ಚಾಲಕ: ರಮೇಶ್ ಕೆ. · TN-09-AB-4521",st_3_t:"ಟ್ರಕ್ ಹೊಲದ ಕಡೆಗೆ ಬರುತ್ತಿದೆ",st_4_t:"ತೂಕ & ಗುಣಮಟ್ಟ ಪರಿಶೀಲನೆ",st_4_s:"ಆಗಮನ ಬಾಕಿಯಿದೆ",st_5_t:"ಪಾವತಿ & ರಸೀದಿ",st_5_s:"ಬಾಕಿಯಿದೆ",
+issues_title:"ಸಮಸ್ಯೆ ವರದಿ ಮಾಡಿ",issues_sub:"ಏನು ತಪ್ಪಾಯಿತು ಎಂದು ನಮಗೆ ತಿಳಿಸಿ, ನಮ್ಮ ತಂಡ 24 ಗಂಟೆಗಳಲ್ಲಿ ಸಂಪರ್ಕಿಸುತ್ತದೆ.",issues_type_label:"ಸಮಸ್ಯೆಯ ಪ್ರಕಾರ",issue_1:"ಟ್ರಕ್ ವಿಳಂಬ",issue_2:"ತಪ್ಪು ಪ್ರಮಾಣ ದಾಖಲಾಗಿದೆ",issue_3:"ಪಾವತಿ ಸ್ವೀಕರಿಸಿಲ್ಲ",issue_4:"ಇತರೆ",issues_desc_label:"ಸಮಸ್ಯೆಯನ್ನು ವಿವರಿಸಿ",issues_ph:"ವಿವರಗಳನ್ನು ಇಲ್ಲಿ ಬರೆಯಿರಿ...",issues_submit:"ಸಮಸ್ಯೆ ಸಲ್ಲಿಸಿ",
+receipt_title:"ಡಿಜಿಟಲ್ ರಸೀದಿ",receipt_sub:"ಪೂರ್ಣಗೊಂಡ ಸಂಗ್ರಹಣೆಗೆ ಪರಿಶೀಲಿಸಿದ ಡಿಜಿಟಲ್ ರಸೀದಿ ರಚಿಸಿ.",receipt_generate:"ರಸೀದಿ ರಚಿಸಿ",r_farmer:"ರೈತ",r_crop:"ಬೆಳೆ",r_centre:"ಕೇಂದ್ರ",r_id:"ರಸೀದಿ ಐಡಿ",r_total:"ಒಟ್ಟು ಪಾವತಿಸಬೇಕಾದ",
+footer_text:"ಸ್ಮಾರ್ಟ್ ಇಂಡಿಯಾ ಹ್ಯಾಕಥಾನ್ ಪ್ರೋಟೋಟೈಪ್ — ರೈತರಿಗಾಗಿ, ಅವರ ಸ್ವಂತ ಭಾಷೆಯಲ್ಲಿ ನಿರ್ಮಿಸಲಾಗಿದೆ.",
+toast_otp_sent:"ನಿಮ್ಮ ಮೊಬೈಲ್ ಸಂಖ್ಯೆಗೆ OTP ಕಳುಹಿಸಲಾಗಿದೆ.",toast_login_ok:"ಲಾಗಿನ್ ಯಶಸ್ವಿಯಾಗಿದೆ. ಮತ್ತೆ ಸ್ವಾಗತ!",toast_slot_ok:"ಸ್ಲಾಟ್ ಯಶಸ್ವಿಯಾಗಿ ಬುಕ್ ಆಗಿದೆ.",toast_truck_ok:"ಟ್ರಕ್ ಬುಕ್ ಆಗಿದೆ — ಅಪ್‌ಡೇಟ್‌ಗಳಿಗಾಗಿ ಲೈವ್ ಟ್ರ್ಯಾಕಿಂಗ್ ನೋಡಿ.",toast_issue_ok:"ಸಮಸ್ಯೆ ಸಲ್ಲಿಸಲಾಗಿದೆ. ನಮ್ಮ ತಂಡ ಶೀಘ್ರದಲ್ಲೇ ಸಂಪರ್ಕಿಸುತ್ತದೆ."},
+
+mr:{tagline:"स्मार्ट खरेदी आणि वाहतूक प्रणाली",nav_login:"लॉगिन",nav_home:"मुख्यपृष्ठ",nav_slot:"स्लॉट बुकिंग",nav_truck:"ट्रक बुकिंग",nav_tracking:"लाइव्ह ट्रॅकिंग",nav_tractor:"ट्रॅक्टर",nav_status:"स्थिती",nav_issues:"तक्रारी",nav_receipt:"पावती",
+live_badge:"सध्या 12 ट्रक रस्त्यावर लाइव्ह आहेत",hero_title:"प्रत्येक ट्रक लोड, शेतापासून बाजारापर्यंत ट्रॅक केला जातो.",hero_sub:"KisanSetu शेतकरी, खरेदी केंद्रे आणि वाहतूक एकाच ठिकाणी जोडते — स्लॉट बुक करा, ट्रक बुक करा, आणि तो तुमच्या भाषेत लाइव्ह नकाशावर पहा.",hero_cta:"शेतकरी म्हणून लॉगिन करा",hero_cta2:"लाइव्ह ट्रॅकिंग पहा",
+stat_lang:"प्रादेशिक भाषा",stat_track:"लाइव्ह ट्रक ट्रॅकिंग",stat_farmers:"नोंदणीकृत शेतकरी",
+features_title:"तुम्ही इथे काय करू शकता",
+feat_slot:"काही सेकंदात तुमच्या जवळच्या केंद्रावर खरेदी स्लॉट आरक्षित करा.",feat_truck:"पिकअपसाठी ट्रकची विनंती करा आणि सत्यापित चालकाशी जुळवा.",feat_track:"तुमचा ट्रक कुठे आहे हे नकाशावर रिअल टाइममध्ये पहा.",feat_tractor:"काढणीच्या हंगामात भाड्याने उपलब्ध जवळचे ट्रॅक्टर शोधा.",feat_issues:"बुकिंगची समस्या नोंदवा आणि थेट सपोर्टशी संपर्क साधा.",feat_receipt:"प्रत्येक पूर्ण झालेल्या खरेदीसाठी सत्यापित पावती तयार करा.",
+login_title:"शेतकरी लॉगिन",login_sub:"वन-टाइम पासवर्ड मिळवण्यासाठी तुमचा नोंदणीकृत मोबाइल नंबर टाका.",login_phone_label:"मोबाइल नंबर",login_phone_ph:"+91 98765 43210",login_send_otp:"OTP पाठवा",login_otp_label:"OTP",login_otp_ph:"••••••",login_verify:"सत्यापित करा आणि पुढे जा",
+slot_title:"खरेदी स्लॉट बुकिंग",slot_sub:"खरेदी केंद्रात डिलिव्हरीसाठी तुमचे पीक, प्रमाण आणि तारीख निवडा.",slot_crop_label:"पीक",slot_qty_label:"प्रमाण (क्विंटल)",slot_centre_label:"खरेदी केंद्र",slot_date_label:"पसंतीची तारीख",slot_book_btn:"स्लॉट बुक करा",
+crop_paddy:"भात",crop_wheat:"गहू",crop_cotton:"कापूस",crop_maize:"मका",crop_sugarcane:"ऊस",
+centre_1:"मंडळ कृषी बाजार आवार — झोन 1",centre_2:"मंडळ कृषी बाजार आवार — झोन 2",centre_3:"गाव संकलन केंद्र",
+truck_title:"ट्रक बुक करा",truck_sub:"तुमच्या शेतातून पिकअपची विनंती करा. पुष्टी झाल्यावर तुम्ही ट्रक लाइव्ह ट्रॅक करू शकाल.",truck_pickup_label:"पिकअप ठिकाण",truck_pickup_ph:"गाव / खूण",truck_size_label:"ट्रकचा आकार",truck_small:"लहान (3 टनांपर्यंत)",truck_medium:"मध्यम (7 टनांपर्यंत)",truck_large:"मोठा (12 टनांपर्यंत)",truck_time_label:"पिकअप वेळ",truck_dest_label:"गंतव्य केंद्र",truck_book_btn:"ट्रक बुक करा",
+tracking_title:"लाइव्ह ट्रक ट्रॅकिंग",tracking_sub:"खालील स्थाने या प्रोटोटाइपसाठी अनुकरण केलेली आहेत — उत्पादनात प्रत्येक ट्रक दर काही सेकंदांनी GPS स्थान पाठवतो.",
+tractor_title:"जवळचे ट्रॅक्टर",tractor_sub:"तुमच्या नोंदणीकृत गावाजवळ भाड्याने उपलब्ध ट्रॅक्टर.",tractor_show_btn:"उपलब्ध ट्रॅक्टर दाखवा",
+status_title:"खरेदी स्थिती",status_sub:"तुमच्या अलीकडील बुकिंगची प्रगती शेवटपर्यंत ट्रॅक करा.",
+st_1_t:"स्लॉट बुक झाला",st_1_s:"झोन 1 · आज, सकाळी 8:40",st_2_t:"ट्रक नियुक्त झाला",st_2_s:"चालक: रमेश के. · TN-09-AB-4521",st_3_t:"ट्रक शेताकडे येत आहे",st_4_t:"वजन आणि गुणवत्ता तपासणी",st_4_s:"आगमन प्रलंबित",st_5_t:"पेमेंट आणि पावती",st_5_s:"प्रलंबित",
+issues_title:"तक्रार नोंदवा",issues_sub:"काय चूक झाली ते आम्हाला सांगा, आमची टीम 24 तासांत संपर्क साधेल.",issues_type_label:"समस्येचा प्रकार",issue_1:"ट्रक उशिरा",issue_2:"चुकीचे प्रमाण नोंदवले",issue_3:"पेमेंट मिळाले नाही",issue_4:"इतर",issues_desc_label:"समस्येचे वर्णन करा",issues_ph:"तपशील इथे लिहा...",issues_submit:"तक्रार सबमिट करा",
+receipt_title:"डिजिटल पावती",receipt_sub:"पूर्ण झालेल्या खरेदीसाठी सत्यापित डिजिटल पावती तयार करा.",receipt_generate:"पावती तयार करा",r_farmer:"शेतकरी",r_crop:"पीक",r_centre:"केंद्र",r_id:"पावती आयडी",r_total:"एकूण देय रक्कम",
+footer_text:"स्मार्ट इंडिया हॅकाथॉन प्रोटोटाइप — शेतकऱ्यांसाठी, त्यांच्याच भाषेत तयार केले.",
+toast_otp_sent:"तुमच्या मोबाइल नंबरवर OTP पाठवला.",toast_login_ok:"लॉगिन यशस्वी. पुन्हा स्वागत आहे!",toast_slot_ok:"स्लॉट यशस्वीरित्या बुक झाला.",toast_truck_ok:"ट्रक बुक झाला — अपडेटसाठी लाइव्ह ट्रॅकिंग पहा.",toast_issue_ok:"तक्रार सबमिट झाली. आमची टीम लवकरच संपर्क साधेल."},
+
+bn:{tagline:"স্মার্ট সংগ্রহ ও পরিবহন ব্যবস্থা",nav_login:"লগইন",nav_home:"হোম",nav_slot:"স্লট বুকিং",nav_truck:"ট্রাক বুকিং",nav_tracking:"লাইভ ট্র্যাকিং",nav_tractor:"ট্রাক্টর",nav_status:"অবস্থা",nav_issues:"অভিযোগ",nav_receipt:"রসিদ",
+live_badge:"এখন ১২টি ট্রাক রাস্তায় লাইভ রয়েছে",hero_title:"প্রতিটি ট্রাক লোড, ক্ষেত থেকে বাজার পর্যন্ত ট্র্যাক করা হয়।",hero_sub:"KisanSetu কৃষক, সংগ্রহ কেন্দ্র এবং পরিবহনকে এক জায়গায় সংযুক্ত করে — স্লট বুক করুন, ট্রাক বুক করুন, এবং আপনার নিজের ভাষায় লাইভ মানচিত্রে দেখুন।",hero_cta:"কৃষক হিসেবে লগইন করুন",hero_cta2:"লাইভ ট্র্যাকিং দেখুন",
+stat_lang:"আঞ্চলিক ভাষা",stat_track:"লাইভ ট্রাক ট্র্যাকিং",stat_farmers:"নিবন্ধিত কৃষক",
+features_title:"আপনি এখানে যা করতে পারেন",
+feat_slot:"কয়েক সেকেন্ডে আপনার নিকটতম কেন্দ্রে সংগ্রহ স্লট সংরক্ষণ করুন।",feat_truck:"পিকআপের জন্য ট্রাক অনুরোধ করুন এবং যাচাইকৃত চালকের সাথে মিলিত হন।",feat_track:"আপনার ট্রাক কোথায় আছে তা মানচিত্রে বাস্তব সময়ে দেখুন।",feat_tractor:"ফসল কাটার মরসুমে ভাড়ার জন্য উপলব্ধ কাছাকাছি ট্রাক্টর খুঁজুন।",feat_issues:"বুকিং সমস্যা রিপোর্ট করুন এবং সরাসরি সহায়তায় পৌঁছান।",feat_receipt:"প্রতিটি সম্পূর্ণ সংগ্রহের জন্য যাচাইকৃত রসিদ তৈরি করুন।",
+login_title:"কৃষক লগইন",login_sub:"এককালীন পাসওয়ার্ড পেতে আপনার নিবন্ধিত মোবাইল নম্বর লিখুন।",login_phone_label:"মোবাইল নম্বর",login_phone_ph:"+91 98765 43210",login_send_otp:"OTP পাঠান",login_otp_label:"OTP",login_otp_ph:"••••••",login_verify:"যাচাই করুন ও এগিয়ে যান",
+slot_title:"সংগ্রহ স্লট বুকিং",slot_sub:"সংগ্রহ কেন্দ্রে ডেলিভারির জন্য আপনার ফসল, পরিমাণ এবং তারিখ নির্বাচন করুন।",slot_crop_label:"ফসল",slot_qty_label:"পরিমাণ (কুইন্টাল)",slot_centre_label:"সংগ্রহ কেন্দ্র",slot_date_label:"পছন্দের তারিখ",slot_book_btn:"স্লট বুক করুন",
+crop_paddy:"ধান",crop_wheat:"গম",crop_cotton:"তুলা",crop_maize:"ভুট্টা",crop_sugarcane:"আখ",
+centre_1:"মণ্ডল কৃষি বাজার প্রাঙ্গণ — জোন ১",centre_2:"মণ্ডল কৃষি বাজার প্রাঙ্গণ — জোন ২",centre_3:"গ্রাম সংগ্রহ কেন্দ্র",
+truck_title:"ট্রাক বুক করুন",truck_sub:"আপনার খামার থেকে পিকআপের অনুরোধ করুন। নিশ্চিত হওয়ার পর আপনি ট্রাকটি লাইভ ট্র্যাক করতে পারবেন।",truck_pickup_label:"পিকআপ স্থান",truck_pickup_ph:"গ্রাম / ল্যান্ডমার্ক",truck_size_label:"ট্রাকের আকার",truck_small:"ছোট (৩ টন পর্যন্ত)",truck_medium:"মাঝারি (৭ টন পর্যন্ত)",truck_large:"বড় (১২ টন পর্যন্ত)",truck_time_label:"পিকআপের সময়",truck_dest_label:"গন্তব্য কেন্দ্র",truck_book_btn:"ট্রাক বুক করুন",
+tracking_title:"লাইভ ট্রাক ট্র্যাকিং",tracking_sub:"নিচের অবস্থানগুলি এই প্রোটোটাইপের জন্য সিমুলেটেড — উৎপাদনে প্রতিটি ট্রাক প্রতি কয়েক সেকেন্ডে GPS অবস্থান পাঠায়।",
+tractor_title:"কাছাকাছি ট্রাক্টর",tractor_sub:"আপনার নিবন্ধিত গ্রামের কাছে ভাড়ার জন্য উপলব্ধ ট্রাক্টর।",tractor_show_btn:"উপলব্ধ ট্রাক্টর দেখান",
+status_title:"সংগ্রহের অবস্থা",status_sub:"আপনার সাম্প্রতিক বুকিংয়ের অগ্রগতি শেষ পর্যন্ত ট্র্যাক করুন।",
+st_1_t:"স্লট বুক হয়েছে",st_1_s:"জোন ১ · আজ, সকাল ৮:৪০",st_2_t:"ট্রাক বরাদ্দ হয়েছে",st_2_s:"চালক: রমেশ কে. · TN-09-AB-4521",st_3_t:"ট্রাক খামারের দিকে আসছে",st_4_t:"ওজন ও মান পরীক্ষা",st_4_s:"আগমন মুলতুবি",st_5_t:"পেমেন্ট ও রসিদ",st_5_s:"মুলতুবি",
+issues_title:"সমস্যা রিপোর্ট করুন",issues_sub:"কী ভুল হয়েছে আমাদের জানান, আমাদের দল ২৪ ঘণ্টার মধ্যে যোগাযোগ করবে।",issues_type_label:"সমস্যার ধরন",issue_1:"ট্রাক বিলম্বিত",issue_2:"ভুল পরিমাণ রেকর্ড হয়েছে",issue_3:"পেমেন্ট পাওয়া যায়নি",issue_4:"অন্যান্য",issues_desc_label:"সমস্যাটি বর্ণনা করুন",issues_ph:"এখানে বিস্তারিত লিখুন...",issues_submit:"সমস্যা জমা দিন",
+receipt_title:"ডিজিটাল রসিদ",receipt_sub:"সম্পূর্ণ সংগ্রহের জন্য যাচাইকৃত ডিজিটাল রসিদ তৈরি করুন।",receipt_generate:"রসিদ তৈরি করুন",r_farmer:"কৃষক",r_crop:"ফসল",r_centre:"কেন্দ্র",r_id:"রসিদ আইডি",r_total:"মোট প্রদেয়",
+footer_text:"স্মার্ট ইন্ডিয়া হ্যাকাথন প্রোটোটাইপ — কৃষকদের জন্য, তাদের নিজস্ব ভাষায় নির্মিত।",
+toast_otp_sent:"আপনার মোবাইল নম্বরে OTP পাঠানো হয়েছে।",toast_login_ok:"লগইন সফল হয়েছে। আবার স্বাগতম!",toast_slot_ok:"স্লট সফলভাবে বুক হয়েছে।",toast_truck_ok:"ট্রাক বুক হয়েছে — আপডেটের জন্য লাইভ ট্র্যাকিং দেখুন।",toast_issue_ok:"সমস্যা জমা দেওয়া হয়েছে। আমাদের দল শীঘ্রই যোগাযোগ করবে।"},
+
+pa:{tagline:"ਸਮਾਰਟ ਖਰੀਦ ਅਤੇ ਆਵਾਜਾਈ ਪਲੇਟਫਾਰਮ",nav_login:"ਲਾਗਇਨ",nav_home:"ਹੋਮ",nav_slot:"ਸਲਾਟ ਬੁਕਿੰਗ",nav_truck:"ਟਰੱਕ ਬੁਕਿੰਗ",nav_tracking:"ਲਾਈਵ ਟਰੈਕਿੰਗ",nav_tractor:"ਟਰੈਕਟਰ",nav_status:"ਸਥਿਤੀ",nav_issues:"ਸ਼ਿਕਾਇਤਾਂ",nav_receipt:"ਰਸੀਦ",
+live_badge:"ਹੁਣੇ 12 ਟਰੱਕ ਸੜਕ 'ਤੇ ਲਾਈਵ ਹਨ",hero_title:"ਹਰ ਟਰੱਕ ਲੋਡ, ਖੇਤ ਤੋਂ ਮੰਡੀ ਤੱਕ ਟਰੈਕ ਕੀਤਾ ਗਿਆ।",hero_sub:"KisanSetu ਕਿਸਾਨਾਂ, ਖਰੀਦ ਕੇਂਦਰਾਂ ਅਤੇ ਆਵਾਜਾਈ ਨੂੰ ਇੱਕ ਥਾਂ 'ਤੇ ਜੋੜਦਾ ਹੈ — ਸਲਾਟ ਬੁੱਕ ਕਰੋ, ਟਰੱਕ ਬੁੱਕ ਕਰੋ, ਅਤੇ ਇਸਨੂੰ ਆਪਣੀ ਭਾਸ਼ਾ ਵਿੱਚ ਲਾਈਵ ਨਕਸ਼ੇ 'ਤੇ ਦੇਖੋ।",hero_cta:"ਕਿਸਾਨ ਵਜੋਂ ਲਾਗਇਨ ਕਰੋ",hero_cta2:"ਲਾਈਵ ਟਰੈਕਿੰਗ ਦੇਖੋ",
+stat_lang:"ਖੇਤਰੀ ਭਾਸ਼ਾਵਾਂ",stat_track:"ਲਾਈਵ ਟਰੱਕ ਟਰੈਕਿੰਗ",stat_farmers:"ਰਜਿਸਟਰਡ ਕਿਸਾਨ",
+features_title:"ਤੁਸੀਂ ਇੱਥੇ ਕੀ ਕਰ ਸਕਦੇ ਹੋ",
+feat_slot:"ਸਕਿੰਟਾਂ ਵਿੱਚ ਆਪਣੇ ਨਜ਼ਦੀਕੀ ਕੇਂਦਰ 'ਤੇ ਖਰੀਦ ਸਲਾਟ ਰਾਖਵਾਂ ਕਰੋ।",feat_truck:"ਪਿਕਅੱਪ ਲਈ ਟਰੱਕ ਦੀ ਬੇਨਤੀ ਕਰੋ ਅਤੇ ਪ੍ਰਮਾਣਿਤ ਡਰਾਈਵਰ ਨਾਲ ਮਿਲੋ।",feat_track:"ਦੇਖੋ ਕਿ ਤੁਹਾਡਾ ਟਰੱਕ ਨਕਸ਼ੇ 'ਤੇ ਅਸਲ ਸਮੇਂ ਵਿੱਚ ਕਿੱਥੇ ਹੈ।",feat_tractor:"ਵਾਢੀ ਦੇ ਮੌਸਮ ਦੌਰਾਨ ਕਿਰਾਏ ਲਈ ਉਪਲਬਧ ਨਜ਼ਦੀਕੀ ਟਰੈਕਟਰ ਲੱਭੋ।",feat_issues:"ਬੁਕਿੰਗ ਸਮੱਸਿਆ ਦੀ ਰਿਪੋਰਟ ਕਰੋ ਅਤੇ ਸਿੱਧੇ ਸਹਾਇਤਾ ਤੱਕ ਪਹੁੰਚੋ।",feat_receipt:"ਹਰ ਪੂਰੀ ਹੋਈ ਖਰੀਦ ਲਈ ਪ੍ਰਮਾਣਿਤ ਰਸੀਦ ਬਣਾਓ।",
+login_title:"ਕਿਸਾਨ ਲਾਗਇਨ",login_sub:"ਇੱਕ-ਵਾਰ ਪਾਸਵਰਡ ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ ਆਪਣਾ ਰਜਿਸਟਰਡ ਮੋਬਾਈਲ ਨੰਬਰ ਦਰਜ ਕਰੋ।",login_phone_label:"ਮੋਬਾਈਲ ਨੰਬਰ",login_phone_ph:"+91 98765 43210",login_send_otp:"OTP ਭੇਜੋ",login_otp_label:"OTP",login_otp_ph:"••••••",login_verify:"ਪੁਸ਼ਟੀ ਕਰੋ ਅਤੇ ਜਾਰੀ ਰੱਖੋ",
+slot_title:"ਖਰੀਦ ਸਲਾਟ ਬੁਕਿੰਗ",slot_sub:"ਖਰੀਦ ਕੇਂਦਰ 'ਤੇ ਡਿਲੀਵਰੀ ਲਈ ਆਪਣੀ ਫਸਲ, ਮਾਤਰਾ ਅਤੇ ਤਾਰੀਖ ਚੁਣੋ।",slot_crop_label:"ਫਸਲ",slot_qty_label:"ਮਾਤਰਾ (ਕੁਇੰਟਲ)",slot_centre_label:"ਖਰੀਦ ਕੇਂਦਰ",slot_date_label:"ਪਸੰਦੀਦਾ ਤਾਰੀਖ",slot_book_btn:"ਸਲਾਟ ਬੁੱਕ ਕਰੋ",
+crop_paddy:"ਝੋਨਾ",crop_wheat:"ਕਣਕ",crop_cotton:"ਕਪਾਹ",crop_maize:"ਮੱਕੀ",crop_sugarcane:"ਗੰਨਾ",
+centre_1:"ਮੰਡਲ ਖੇਤੀ ਮੰਡੀ ਯਾਰਡ — ਜ਼ੋਨ 1",centre_2:"ਮੰਡਲ ਖੇਤੀ ਮੰਡੀ ਯਾਰਡ — ਜ਼ੋਨ 2",centre_3:"ਪਿੰਡ ਇਕੱਠ ਕੇਂਦਰ",
+truck_title:"ਟਰੱਕ ਬੁੱਕ ਕਰੋ",truck_sub:"ਆਪਣੇ ਖੇਤ ਤੋਂ ਪਿਕਅੱਪ ਦੀ ਬੇਨਤੀ ਕਰੋ। ਪੁਸ਼ਟੀ ਹੋਣ 'ਤੇ ਤੁਸੀਂ ਟਰੱਕ ਨੂੰ ਲਾਈਵ ਟਰੈਕ ਕਰ ਸਕੋਗੇ।",truck_pickup_label:"ਪਿਕਅੱਪ ਸਥਾਨ",truck_pickup_ph:"ਪਿੰਡ / ਨਿਸ਼ਾਨ",truck_size_label:"ਟਰੱਕ ਦਾ ਆਕਾਰ",truck_small:"ਛੋਟਾ (3 ਟਨ ਤੱਕ)",truck_medium:"ਦਰਮਿਆਨਾ (7 ਟਨ ਤੱਕ)",truck_large:"ਵੱਡਾ (12 ਟਨ ਤੱਕ)",truck_time_label:"ਪਿਕਅੱਪ ਸਮਾਂ",truck_dest_label:"ਮੰਜ਼ਿਲ ਕੇਂਦਰ",truck_book_btn:"ਟਰੱਕ ਬੁੱਕ ਕਰੋ",
+tracking_title:"ਲਾਈਵ ਟਰੱਕ ਟਰੈਕਿੰਗ",tracking_sub:"ਹੇਠਾਂ ਦਿੱਤੀਆਂ ਸਥਿਤੀਆਂ ਇਸ ਪ੍ਰੋਟੋਟਾਈਪ ਲਈ ਸਿਮੂਲੇਟ ਕੀਤੀਆਂ ਗਈਆਂ ਹਨ — ਉਤਪਾਦਨ ਵਿੱਚ ਹਰ ਟਰੱਕ ਹਰ ਕੁਝ ਸਕਿੰਟਾਂ ਵਿੱਚ GPS ਸਥਿਤੀ ਭੇਜਦਾ ਹੈ।",
+tractor_title:"ਨਜ਼ਦੀਕੀ ਟਰੈਕਟਰ",tractor_sub:"ਤੁਹਾਡੇ ਰਜਿਸਟਰਡ ਪਿੰਡ ਦੇ ਨੇੜੇ ਕਿਰਾਏ ਲਈ ਉਪਲਬਧ ਟਰੈਕਟਰ।",tractor_show_btn:"ਉਪਲਬਧ ਟਰੈਕਟਰ ਦਿਖਾਓ",
+status_title:"ਖਰੀਦ ਸਥਿਤੀ",status_sub:"ਆਪਣੀ ਹਾਲੀਆ ਬੁਕਿੰਗ ਦੀ ਪ੍ਰਗਤੀ ਨੂੰ ਅੰਤ ਤੱਕ ਟਰੈਕ ਕਰੋ।",
+st_1_t:"ਸਲਾਟ ਬੁੱਕ ਹੋਇਆ",st_1_s:"ਜ਼ੋਨ 1 · ਅੱਜ, ਸਵੇਰੇ 8:40",st_2_t:"ਟਰੱਕ ਨਿਯੁਕਤ ਹੋਇਆ",st_2_s:"ਡਰਾਈਵਰ: ਰਮੇਸ਼ ਕੇ. · TN-09-AB-4521",st_3_t:"ਟਰੱਕ ਖੇਤ ਵੱਲ ਆ ਰਿਹਾ ਹੈ",st_4_t:"ਤੋਲ ਅਤੇ ਗੁਣਵੱਤਾ ਜਾਂਚ",st_4_s:"ਆਗਮਨ ਬਾਕੀ",st_5_t:"ਭੁਗਤਾਨ ਅਤੇ ਰਸੀਦ",st_5_s:"ਬਾਕੀ",
+issues_title:"ਸਮੱਸਿਆ ਦੀ ਰਿਪੋਰਟ ਕਰੋ",issues_sub:"ਸਾਨੂੰ ਦੱਸੋ ਕੀ ਗਲਤ ਹੋਇਆ, ਸਾਡੀ ਟੀਮ 24 ਘੰਟਿਆਂ ਵਿੱਚ ਸੰਪਰਕ ਕਰੇਗੀ।",issues_type_label:"ਸਮੱਸਿਆ ਦੀ ਕਿਸਮ",issue_1:"ਟਰੱਕ ਦੇਰੀ",issue_2:"ਗਲਤ ਮਾਤਰਾ ਦਰਜ",issue_3:"ਭੁਗਤਾਨ ਪ੍ਰਾਪਤ ਨਹੀਂ ਹੋਇਆ",issue_4:"ਹੋਰ",issues_desc_label:"ਸਮੱਸਿਆ ਦਾ ਵੇਰਵਾ ਦਿਓ",issues_ph:"ਵੇਰਵੇ ਇੱਥੇ ਲਿਖੋ...",issues_submit:"ਸਮੱਸਿਆ ਜਮ੍ਹਾਂ ਕਰੋ",
+receipt_title:"ਡਿਜੀਟਲ ਰਸੀਦ",receipt_sub:"ਪੂਰੀ ਹੋਈ ਖਰੀਦ ਲਈ ਪ੍ਰਮਾਣਿਤ ਡਿਜੀਟਲ ਰਸੀਦ ਬਣਾਓ।",receipt_generate:"ਰਸੀਦ ਬਣਾਓ",r_farmer:"ਕਿਸਾਨ",r_crop:"ਫਸਲ",r_centre:"ਕੇਂਦਰ",r_id:"ਰਸੀਦ ਆਈਡੀ",r_total:"ਕੁੱਲ ਭੁਗਤਾਨਯੋਗ",
+footer_text:"ਸਮਾਰਟ ਇੰਡੀਆ ਹੈਕਾਥੌਨ ਪ੍ਰੋਟੋਟਾਈਪ — ਕਿਸਾਨਾਂ ਲਈ, ਉਹਨਾਂ ਦੀ ਆਪਣੀ ਭਾਸ਼ਾ ਵਿੱਚ ਬਣਾਇਆ ਗਿਆ।",
+toast_otp_sent:"ਤੁਹਾਡੇ ਮੋਬਾਈਲ ਨੰਬਰ 'ਤੇ OTP ਭੇਜਿਆ ਗਿਆ।",toast_login_ok:"ਲਾਗਇਨ ਸਫਲ ਰਿਹਾ। ਵਾਪਸੀ 'ਤੇ ਸਵਾਗਤ ਹੈ!",toast_slot_ok:"ਸਲਾਟ ਸਫਲਤਾਪੂਰਵਕ ਬੁੱਕ ਹੋਇਆ।",toast_truck_ok:"ਟਰੱਕ ਬੁੱਕ ਹੋਇਆ — ਅੱਪਡੇਟਾਂ ਲਈ ਲਾਈਵ ਟਰੈਕਿੰਗ ਦੇਖੋ।",toast_issue_ok:"ਸਮੱਸਿਆ ਜਮ੍ਹਾਂ ਹੋ ਗਈ। ਸਾਡੀ ਟੀਮ ਜਲਦੀ ਸੰਪਰਕ ਕਰੇਗੀ।"}
+};
+
+let currentLang = 'en';
+
+function applyLang(lang){
+  currentLang = lang;
+  const dict = I18N[lang] || I18N.en;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(dict[key]) el.textContent = dict[key];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-ph');
+    if(dict[key]) el.setAttribute('placeholder', dict[key]);
+  });
+  document.getElementById('htmlRoot').setAttribute('lang', lang);
+  renderTruckList();
+}
+document.getElementById('langSelect').addEventListener('change', e=>applyLang(e.target.value));
+
+/* ---------------- Tab navigation ---------------- */
+function showPanel(name){
+  document.querySelectorAll('section.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  const btn = document.querySelector('.tab-btn[data-panel="'+name+'"]');
+  if(btn) btn.classList.add('active');
+  if(name==='tracking'){ setTimeout(()=>{ if(map) map.invalidateSize(); },60); }
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-generatedOTP="1234";
-
-alert("Demo OTP: 1234");
-
-document.getElementById("otpArea").style.display="block";
+/* ---------------- Mock interactions ---------------- */
+function flashToast(id,msgKey){
+  const el = document.getElementById(id);
+  el.textContent = I18N[currentLang][msgKey] || I18N.en[msgKey];
+  el.classList.add('show');
+}
+function sendOtp(){ flashToast('loginToast','toast_otp_sent'); }
+function verifyOtp(){ flashToast('loginToast','toast_login_ok'); }
+function bookSlot(){ flashToast('slotToast','toast_slot_ok'); }
+function bookTruck(){ flashToast('truckToast','toast_truck_ok'); showPanel('tracking'); }
+function submitIssue(){ flashToast('issueToast','toast_issue_ok'); }
+function generateReceipt(){
+  document.getElementById('receiptBox').classList.add('show');
+  document.getElementById('receiptId').textContent = 'KS-' + Math.floor(100000+Math.random()*899999);
 }
 
-function verifyOTP(){
-
-let otp=document.getElementById("otp").value;
-
-if(otp===generatedOTP){
-
-document.getElementById("loginMessage").innerHTML=
-"✅ Login Successful";
-
-document.getElementById("portal").style.display="block";
-
-document.getElementById("loginSection").style.display="none";
-
-}
-else{
-alert("Invalid OTP");
+const TRACTOR_DATA = [
+  {name:'Mahindra 575 DI',dist:'1.2 km',rate:'₹650/hr'},
+  {name:'Swaraj 744 FE',dist:'2.4 km',rate:'₹600/hr'},
+  {name:'John Deere 5310',dist:'3.1 km',rate:'₹800/hr'},
+  {name:'Sonalika DI 745',dist:'4.0 km',rate:'₹580/hr'}
+];
+function showTractors(){
+  const list = document.getElementById('tractorList');
+  list.style.display='grid';
+  list.innerHTML = TRACTOR_DATA.map(t=>`
+    <div class="tractor-item">
+      <div><h4>${t.name}</h4><span>${t.dist} away</span></div>
+      <span class="chip">${t.rate}</span>
+    </div>`).join('');
 }
 
-}
-
-function showTab(tab){
-
-let tabs=document.querySelectorAll(".tab-content");
-
-tabs.forEach(t=>t.style.display="none");
-
-document.getElementById(tab).style.display="block";
-
-}
-
-function bookSlot(){
-
-let crop=document.getElementById("crop").value;
-let qty=document.getElementById("qty").value;
-let date=document.getElementById("date").value;
-
-document.getElementById("slotResult").innerHTML=
-"✅ Slot Booked Successfully";
-
-document.getElementById("statusBox").innerHTML=
-"Crop: "+crop+"<br>Quantity: "+qty+
-"<br>Date: "+date+
-"<br>Status: Confirmed";
-
-}
-
-function bookTruck(){
-
-document.getElementById("truckResult").innerHTML=
-"🚚 Truck Assigned<br>Vehicle: TS09AB1234<br>Driver: Ramesh";
-
-}
-
-function loadTractors(){
-
-let tractors=[
-"Tractor 1 - 1.2 KM",
-"Tractor 2 - 2.5 KM",
-"Tractor 3 - 4.1 KM",
-"Tractor 4 - 5.3 KM"
+/* ---------------- Live tracking (simulated GPS) ---------------- */
+// Agri-belt reference point (Andhra Pradesh procurement corridor)
+const MANDI = [16.3067, 80.4365];
+const TRUCKS = [
+  { id:'TN-09-AB-4521', driver:'Ramesh K.', status:'enroute', load:'Paddy · 6.2 t',
+    route:[[16.2705,80.3610],[16.2820,80.3790],[16.2915,80.3990],[16.3005,80.4180],[16.3067,80.4365]] },
+  { id:'AP-16-CD-7788', driver:'Lakshmi N.', status:'enroute', load:'Cotton · 4.8 t',
+    route:[[16.3510,80.4790],[16.3400,80.4680],[16.3280,80.4570],[16.3170,80.4460],[16.3067,80.4365]] },
+  { id:'AP-07-GT-2290', driver:'Suresh P.', status:'loading', load:'Maize · 5.5 t',
+    route:[[16.2480,80.4810],[16.2480,80.4810]] },
+  { id:'TS-05-HY-3341', driver:'Kiran B.', status:'delivered', load:'Wheat · 7.0 t',
+    route:[[16.3067,80.4365],[16.3067,80.4365]] }
 ];
 
-let html="";
+let map, markers = {}, routeLines = {};
+function initMap(){
+  map = L.map('map',{scrollWheelZoom:false}).setView(MANDI, 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'&copy; OpenStreetMap contributors', maxZoom:18
+  }).addTo(map);
 
-tractors.forEach(function(t){
-html+="<li>"+t+"</li>";
+  const mandiIcon = L.divIcon({html:'🏬',className:'',iconSize:[26,26]});
+  L.marker(MANDI,{icon:mandiIcon}).addTo(map).bindPopup('<b>Zone 1 Market Yard</b><br>Procurement Centre');
+
+  TRUCKS.forEach(t=>{
+    t.progress = t.status==='delivered' ? 1 : (t.status==='loading' ? 0 : Math.random()*0.4);
+    const icon = L.divIcon({html:'🚚',className:'',iconSize:[26,26]});
+    const pos = pointOnRoute(t.route, t.progress);
+    const m = L.marker(pos,{icon}).addTo(map);
+    m.bindPopup(popupHtml(t));
+    markers[t.id] = m;
+    if(t.route.length>1){
+      routeLines[t.id] = L.polyline(t.route,{color:'#2C6E8F',weight:2,opacity:0.35,dashArray:'4,6'}).addTo(map);
+    }
+  });
+}
+
+function pointOnRoute(route, progress){
+  if(route.length<2) return route[0];
+  const segCount = route.length-1;
+  const segLen = 1/segCount;
+  let seg = Math.min(Math.floor(progress/segLen), segCount-1);
+  const localT = (progress - seg*segLen)/segLen;
+  const a = route[seg], b = route[seg+1];
+  return [a[0]+(b[0]-a[0])*localT, a[1]+(b[1]-a[1])*localT];
+}
+
+function popupHtml(t){
+  const statusLabel = {enroute:'En route', loading:'Loading', delivered:'Delivered'}[t.status];
+  return `<b>${t.id}</b><br>${t.driver}<br>${t.load}<br>Status: ${statusLabel}`;
+}
+
+function etaMinutes(t){
+  if(t.status==='delivered') return 0;
+  if(t.status==='loading') return null;
+  return Math.max(1, Math.round((1-t.progress)*38));
+}
+
+function renderTruckList(){
+  const wrap = document.getElementById('truckList');
+  if(!wrap) return;
+  wrap.innerHTML = TRUCKS.map(t=>{
+    const eta = etaMinutes(t);
+    const statusClass = t.status==='enroute'?'status-enroute':t.status==='loading'?'status-loading':'status-delivered';
+    const statusLabel = t.status==='enroute'?'En route':t.status==='loading'?'Loading':'Delivered';
+    const pct = Math.round((t.progress||0)*100);
+    return `<div class="truck-card" onclick="focusTruck('${t.id}')">
+      <div class="truck-card-top"><b>${t.id}</b><span class="status-tag ${statusClass}">${statusLabel}</span></div>
+      <div class="truck-meta"><span>${t.driver}</span><span>${t.load}</span></div>
+      <div class="truck-meta" style="margin-top:4px;"><span>${eta!==null? 'ETA '+eta+' min' : 'At centre'}</span><span>${pct}%</span></div>
+      <div class="truck-progress"><i style="width:${pct}%"></i></div>
+    </div>`;
+  }).join('');
+  const etaEl = document.getElementById('statusEta');
+  if(etaEl){
+    const t0 = TRUCKS[0];
+    const eta = etaMinutes(t0);
+    etaEl.textContent = (I18N[currentLang].st_3_s || 'ETA {n} minutes').includes('{n}') ?
+      (I18N[currentLang].st_3_s||'').replace('{n}', eta) :
+      'ETA ' + eta + ' ' + (currentLang==='en'?'minutes':'min');
+  }
+}
+
+function focusTruck(id){
+  const m = markers[id];
+  if(m){ map.setView(m.getLatLng(), 13); m.openPopup(); }
+  document.querySelectorAll('.truck-card').forEach(c=>c.classList.remove('selected'));
+}
+
+function tickTrucks(){
+  TRUCKS.forEach(t=>{
+    if(t.status==='enroute'){
+      t.progress += 0.006 + Math.random()*0.004;
+      if(t.progress>=1){ t.progress=1; t.status='delivered'; }
+      const pos = pointOnRoute(t.route, t.progress);
+      const m = markers[t.id];
+      if(m){ m.setLatLng(pos); m.setPopupContent(popupHtml(t)); }
+    } else if(t.status==='loading'){
+      if(Math.random()<0.01){ t.status='enroute'; t.progress=0; t.route=[t.route[0],
+        [t.route[0][0]+(MANDI[0]-t.route[0][0])*0.5, t.route[0][1]+(MANDI[1]-t.route[0][1])*0.5], MANDI];
+        if(routeLines[t.id]) map.removeLayer(routeLines[t.id]);
+        routeLines[t.id] = L.polyline(t.route,{color:'#2C6E8F',weight:2,opacity:0.35,dashArray:'4,6'}).addTo(map);
+      }
+    }
+  });
+  renderTruckList();
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  initMap();
+  renderTruckList();
+  setInterval(tickTrucks, 1800);
+  applyLang('en');
 });
-
-document.getElementById("tractorList").innerHTML=html;
-
-}
-
-function submitIssue(){
-
-document.getElementById("issueResult").innerHTML=
-"✅ Issue Submitted Successfully";
-
-}
-
-function generateReceipt(){
-
-let crop=document.getElementById("crop").value;
-let qty=document.getElementById("qty").value;
-
-document.getElementById("receiptBox").innerHTML=
-
-"FARMER PROCUREMENT RECEIPT\n\n"+
-"Farmer: "+farmerName+"\n"+
-"Mobile: "+farmerMobile+"\n"+
-"Crop: "+crop+"\n"+
-"Quantity: "+qty+"\n"+
-"Status: Confirmed\n"+
-"Receipt ID: REC"+
-Math.floor(Math.random()*100000);
-
-}
-
 </script>
-
 </body>
 </html>
